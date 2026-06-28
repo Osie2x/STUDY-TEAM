@@ -1,0 +1,1982 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MA123 Lab 6 Determinants Study App</title>
+    <style>
+:root {
+  --bg: #f7f3ec;
+  --panel: #fffaf2;
+  --ink: #241f1a;
+  --muted: #6e6258;
+  --accent: #7c3aed;
+  --accent-dark: #5521b5;
+  --mint: #dff7ec;
+  --gold: #ffe7a6;
+  --rose: #ffe1e1;
+  --line: #e4d8c8;
+  --shadow: 0 18px 50px rgba(63, 45, 28, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.14), transparent 34rem),
+    radial-gradient(circle at 90% 0%, rgba(255, 183, 77, 0.22), transparent 30rem),
+    var(--bg);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(20rem, 0.7fr);
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 4rem 1.25rem 2rem;
+}
+
+.hero__content,
+.hero__panel,
+.card,
+.notice,
+.metric,
+.path-card,
+.gauntlet__shell {
+  background: rgba(255, 250, 242, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+}
+
+.hero__content {
+  padding: 3rem;
+}
+
+.hero__panel {
+  padding: 2rem;
+  align-self: stretch;
+}
+
+.hero h1 {
+  margin: 0;
+  max-width: 13ch;
+  font-size: clamp(3rem, 8vw, 6.7rem);
+  line-height: 0.93;
+  letter-spacing: -0.08em;
+}
+
+.hero__lede {
+  max-width: 44rem;
+  color: var(--muted);
+  font-size: 1.25rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--accent-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.hero__actions,
+.practice-actions,
+.tracker-actions,
+.lesson__actions,
+.gauntlet-actions,
+.operation-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.button {
+  border: 0;
+  border-radius: 999px;
+  background: #eee3d7;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.8rem 1.25rem;
+  font-weight: 850;
+  text-decoration: none;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.button:hover,
+.question-chip:hover {
+  transform: translateY(-2px);
+}
+
+.button--primary {
+  background: var(--accent);
+  color: white;
+}
+
+.button--danger {
+  background: #bf2424;
+  color: white;
+}
+
+.button--small {
+  min-height: 2.4rem;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.9rem;
+}
+
+.checklist {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.checklist li {
+  margin: 0.6rem 0;
+}
+
+main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.25rem 5rem;
+}
+
+.notice {
+  margin: 1rem 0;
+  padding: 1.3rem 1.5rem;
+  border-left: 8px solid var(--accent);
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+}
+
+.metric {
+  padding: 1.4rem;
+  text-align: center;
+}
+
+.metric span {
+  display: block;
+  font-size: 2.8rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.metric p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 750;
+}
+
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding: 0.8rem 0;
+  background: rgba(247, 243, 236, 0.86);
+  backdrop-filter: blur(14px);
+}
+
+.tabs a {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 250, 242, 0.88);
+  color: var(--ink);
+  flex: 0 0 auto;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.section {
+  padding: 4rem 0 2rem;
+}
+
+.section--tinted {
+  margin-inline: -1.25rem;
+  padding-inline: 1.25rem;
+  background: linear-gradient(180deg, rgba(255, 250, 242, 0.5), rgba(223, 247, 236, 0.3));
+  border-radius: 36px;
+}
+
+.section__header {
+  margin-bottom: 1.4rem;
+}
+
+.section__header h2 {
+  margin: 0;
+  max-width: 18ch;
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.section__header p:not(.eyebrow) {
+  max-width: 52rem;
+  color: var(--muted);
+}
+
+.path-grid,
+.visual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.path-card {
+  position: relative;
+  padding: 1.6rem;
+  overflow: hidden;
+}
+
+.path-card__badge {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  background: var(--accent);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 950;
+}
+
+.path-card h3,
+.card h3,
+.wrong-item h3 {
+  margin: 0.8rem 0 0.35rem;
+  font-size: 1.55rem;
+  line-height: 1.1;
+}
+
+.path-card p,
+.card p,
+.wrong-item p {
+  color: var(--muted);
+}
+
+.path-card ol {
+  padding-left: 1.25rem;
+}
+
+.card {
+  padding: 1.5rem;
+}
+
+.visual-card {
+  min-height: 27rem;
+}
+
+.visual-card:first-child {
+  grid-row: span 2;
+}
+
+.matrix-controls {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.matrix-controls label {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+select,
+.answer-input {
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: white;
+  color: var(--ink);
+  padding: 0.8rem 1rem;
+}
+
+.cofactor-viz {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.arrow {
+  color: var(--accent);
+  font-size: 2rem;
+  font-weight: 950;
+}
+
+.viz-label {
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 850;
+}
+
+.matrix {
+  display: inline-grid;
+  gap: 0.3rem;
+  padding: 0.8rem;
+  border: 2px solid var(--ink);
+  border-inline-width: 5px;
+  border-radius: 14px;
+  background: white;
+}
+
+.matrix__row {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.matrix span {
+  min-width: 3.1rem;
+  min-height: 3.1rem;
+  border-radius: 12px;
+  background: #f3eadf;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+
+.matrix span.selected {
+  background: var(--gold);
+  outline: 3px solid #e49c16;
+}
+
+.matrix span.deleted {
+  background: var(--rose);
+  color: #9f1d1d;
+  text-decoration: line-through;
+}
+
+.formula-strip {
+  margin-top: 1rem;
+  border-radius: 18px;
+  background: #221a32;
+  color: white;
+  padding: 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 800;
+  overflow-x: auto;
+}
+
+.operation-buttons button {
+  border: 0;
+  border-radius: 16px;
+  background: #eee3d7;
+  cursor: pointer;
+  padding: 0.7rem 0.9rem;
+  font-weight: 850;
+}
+
+.lesson-list,
+.practice-list,
+.wrong-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.lesson__header {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.lesson__steps {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: white;
+  padding: 1rem;
+}
+
+.step__number {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 950;
+}
+
+.step h4 {
+  margin: 0;
+}
+
+.step p {
+  margin: 0.35rem 0 0;
+  color: var(--ink);
+  font-size: 1.08rem;
+}
+
+.empty-state {
+  border: 2px dashed var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
+  padding: 1.2rem;
+  font-weight: 750;
+}
+
+.question-chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.question-chip {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: white;
+  cursor: pointer;
+  padding: 1rem;
+  text-align: left;
+}
+
+.question-chip span {
+  display: block;
+  font-weight: 900;
+}
+
+.question-chip small,
+.source-line,
+.wrong-item small {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.wrong-item {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+  padding: 1.2rem;
+}
+
+.gauntlet {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  place-items: center;
+  background: rgba(17, 14, 11, 0.78);
+  padding: 1rem;
+}
+
+.gauntlet.is-open {
+  display: grid;
+}
+
+.gauntlet__shell {
+  width: min(960px, 100%);
+  max-height: 94vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.gauntlet__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1rem;
+}
+
+.gauntlet__top h2 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.gauntlet__progress {
+  border-radius: 999px;
+  background: var(--mint);
+  padding: 0.7rem 1rem;
+  font-weight: 950;
+}
+
+.pledge {
+  margin: 1rem 0;
+  border-radius: 18px;
+  background: var(--gold);
+  padding: 1rem;
+  font-weight: 850;
+}
+
+.gauntlet-card {
+  margin-top: 1rem;
+  border-radius: 28px;
+  background: white;
+  padding: 1.6rem;
+}
+
+.gauntlet-card h3 {
+  margin: 0.5rem 0;
+  font-size: clamp(1.9rem, 5vw, 3.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.gauntlet-prompt {
+  color: var(--ink);
+  font-size: 1.45rem;
+  font-weight: 750;
+}
+
+.answer-label {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 900;
+}
+
+.answer-input {
+  width: 100%;
+  font-size: 1.6rem;
+}
+
+.feedback {
+  margin-top: 1rem;
+  border-radius: 22px;
+  padding: 1rem;
+}
+
+.feedback--correct {
+  background: var(--mint);
+}
+
+.feedback--wrong {
+  background: var(--rose);
+}
+
+.feedback h4 {
+  margin: 0 0 0.4rem;
+  font-size: 1.25rem;
+}
+
+.solution {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.8rem 0;
+  padding-left: 1.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 800;
+}
+
+.mini-recall {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.68);
+  padding: 0.8rem;
+}
+
+.finish-card {
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .hero,
+  .path-grid,
+  .visual-grid,
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__content {
+    padding: 2rem;
+  }
+
+  .cofactor-viz {
+    grid-template-columns: 1fr;
+  }
+
+  .arrow {
+    transform: rotate(90deg);
+    text-align: center;
+  }
+
+  .question-chips {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson__header,
+  .wrong-item,
+  .gauntlet__top {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__content">
+        <p class="eyebrow">MA123 Spring Lab 6</p>
+        <h1>Determinants, Cofactors, Properties, and Invertibility</h1>
+        <p class="hero__lede">
+          Built from your current Lab 6 notes, Sections 4.1 and 4.2 of Hu et al.,
+          MATLAB Grader pre-lab material, and your study-style notes.
+        </p>
+        <div class="hero__actions">
+          <a class="button button--primary" href="#recommended-path">Start recommended path</a>
+          <a class="button" href="./ma123_lab6_determinants_study_app.html" download>Download one-file app</a>
+          <a class="button" href="./downloads/ma123-lab6-determinants-study-app.zip" download>Download zip</a>
+          <button class="button" id="startGauntletHero">Start focus gauntlet</button>
+        </div>
+      </div>
+      <aside class="hero__panel">
+        <h2>How this app teaches you</h2>
+        <ul class="checklist">
+          <li>Plain idea first, formula second.</li>
+          <li>Every worked example reveals one step at a time.</li>
+          <li>Practice is interleaved: old skills return later.</li>
+          <li>Wrong answers create a retry queue and mini reteach.</li>
+          <li>Each problem lists its source or likely-lab origin.</li>
+        </ul>
+      </aside>
+    </header>
+
+    <main>
+      <section class="notice">
+        <strong>No AI help during gauntlet practice.</strong>
+        Use paper, your calculator, and MATLAB only where the question asks for MATLAB.
+        If you cannot start after 30 seconds, type <strong>IDK</strong>.
+        <br />
+        <strong>Want everything in one place?</strong>
+        Download <a href="./ma123_lab6_determinants_study_app.html" download>the single-file app</a>
+        or <a href="./downloads/ma123-lab6-determinants-study-app.zip" download>the zip package</a>.
+      </section>
+
+      <section class="dashboard" aria-label="study dashboard">
+        <div class="metric">
+          <span id="completedCount">0</span>
+          <p>questions completed</p>
+        </div>
+        <div class="metric">
+          <span id="wrongCount">0</span>
+          <p>wrong/IDK tracked</p>
+        </div>
+        <div class="metric">
+          <span id="streakCount">0</span>
+          <p>current streak</p>
+        </div>
+        <div class="metric">
+          <span id="reviewDue">0</span>
+          <p>review items due</p>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="Study sections">
+        <a href="#recommended-path">Path</a>
+        <a href="#visual-lab">Visual Lab</a>
+        <a href="#guided-lessons">Guided</a>
+        <a href="#practice-library">Practice</a>
+        <a href="#tracker">Wrong Tracker</a>
+      </nav>
+
+      <section id="recommended-path" class="section">
+        <div class="section__header">
+          <p class="eyebrow">Recommended path</p>
+          <h2>Move in stages, but jump freely if you feel ready.</h2>
+        </div>
+        <div class="path-grid" id="pathGrid"></div>
+      </section>
+
+      <section id="visual-lab" class="section section--tinted">
+        <div class="section__header">
+          <p class="eyebrow">Visual Lab</p>
+          <h2>See what changes before you calculate.</h2>
+        </div>
+        <div class="visual-grid">
+          <article class="card visual-card">
+            <h3>Cofactor expansion visualizer</h3>
+            <p>Pick an entry. The app deletes that row and column, shows the sign, and writes the exact cofactor term.</p>
+            <div class="matrix-controls">
+              <label>Row
+                <select id="cofactorRow">
+                  <option value="0">1</option>
+                  <option value="1">2</option>
+                  <option value="2">3</option>
+                </select>
+              </label>
+              <label>Column
+                <select id="cofactorCol">
+                  <option value="0">1</option>
+                  <option value="1">2</option>
+                  <option value="2">3</option>
+                </select>
+              </label>
+            </div>
+            <div id="cofactorViz" class="cofactor-viz"></div>
+            <div id="cofactorText" class="formula-strip"></div>
+          </article>
+
+          <article class="card visual-card">
+            <h3>Row-operation determinant tracker</h3>
+            <p>Click operations and watch which ones change det(A). This targets the Lab 6 property list.</p>
+            <div class="operation-buttons">
+              <button data-op="replace">R3 <- R3 - 2R1</button>
+              <button data-op="swap">Swap R1 and R2</button>
+              <button data-op="scale">R2 <- 3R2</button>
+              <button data-op="reset">Reset</button>
+            </div>
+            <div id="rowOpViz" class="rowop-viz"></div>
+            <div id="detStatus" class="formula-strip"></div>
+          </article>
+
+          <article class="card visual-card">
+            <h3>Triangular shortcut</h3>
+            <p>For upper/lower triangular matrices, the diagonal is the whole determinant story.</p>
+            <div id="triangularViz" class="triangular-viz"></div>
+            <div class="formula-strip">det(A) = product of main diagonal = (-1)(3)(2)(1)(-2) = 12</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="guided-lessons" class="section">
+        <div class="section__header">
+          <p class="eyebrow">Guided reveal lessons</p>
+          <h2>Read, say it aloud, then reveal the next math line.</h2>
+        </div>
+        <div id="lessonList" class="lesson-list"></div>
+      </section>
+
+      <section id="practice-library" class="section section--tinted">
+        <div class="section__header">
+          <p class="eyebrow">Practice library</p>
+          <h2>All relevant questions, grouped and interleaved.</h2>
+          <p>
+            Each stage begins with two or three guided problems, then practice. When you finish
+            a later stage, the gauntlet automatically pulls older-stage review problems.
+          </p>
+        </div>
+        <div class="practice-actions">
+          <button class="button button--primary" id="startStageA">Start Stage A gauntlet</button>
+          <button class="button" id="startStageB">Start Stage B gauntlet</button>
+          <button class="button" id="startStageC">Start Stage C gauntlet</button>
+          <button class="button" id="startMixed">Start mixed interleaved gauntlet</button>
+        </div>
+        <div id="practiceList" class="practice-list"></div>
+      </section>
+
+      <section id="tracker" class="section">
+        <div class="section__header">
+          <p class="eyebrow">Wrong-answer tracker</p>
+          <h2>Your personal retry queue.</h2>
+          <p>Stored in this browser with localStorage. Clear it only when you can redo the problems cold on paper.</p>
+        </div>
+        <div class="tracker-actions">
+          <button class="button button--primary" id="startWrongQueue">Practice wrong queue</button>
+          <button class="button button--danger" id="clearTracker">Clear tracker</button>
+        </div>
+        <div id="wrongTracker" class="wrong-list"></div>
+      </section>
+    </main>
+
+    <div id="gauntlet" class="gauntlet" aria-hidden="true">
+      <div class="gauntlet__shell">
+        <div class="gauntlet__top">
+          <div>
+            <p class="eyebrow">Focus gauntlet</p>
+            <h2 id="gauntletTitle">Practice</h2>
+          </div>
+          <div class="gauntlet__progress" id="gauntletProgress"></div>
+        </div>
+        <div class="pledge" id="pledgeBox">
+          <label>
+            <input type="checkbox" id="pledgeCheck" />
+            I will use no AI help and will not go online. I will answer from my notes, paper work, MATLAB when asked, or type IDK.
+          </label>
+        </div>
+        <article class="gauntlet-card" id="gauntletCard"></article>
+      </div>
+    </div>
+
+    <script>
+const APP_DATA = {
+  stages: [
+    {
+      id: "A",
+      title: "Stage A - Cofactor foundation",
+      goal: "Know submatrix, minor, cofactor, sign grid, and 2x2 determinant without hesitation.",
+      path: [
+        "Do Guided Lesson 1.",
+        "Do Guided Lesson 2.",
+        "Start Stage A gauntlet.",
+        "Exit condition: reproduce the 3x3 sign grid and solve two cofactor questions on paper."
+      ]
+    },
+    {
+      id: "B",
+      title: "Stage B - Compute determinants efficiently",
+      goal: "Choose the easiest row/column, use zeros, and use triangular shortcuts.",
+      path: [
+        "Do Guided Lesson 3.",
+        "Use the cofactor visualizer once.",
+        "Start Stage B gauntlet.",
+        "Then return to two Stage A review questions."
+      ]
+    },
+    {
+      id: "C",
+      title: "Stage C - Properties and row operations",
+      goal: "Track which determinant properties preserve, scale, or flip the determinant.",
+      path: [
+        "Use the row-operation tracker.",
+        "Do Guided Lesson 4.",
+        "Start Stage C gauntlet.",
+        "Then return to one Stage A and one Stage B review question."
+      ]
+    },
+    {
+      id: "D",
+      title: "Stage D - Invertibility, rank, linear independence, MATLAB",
+      goal: "Connect det(A) != 0, inverse, RREF, rank, unique solutions, and MATLAB outputs.",
+      path: [
+        "Do Guided Lesson 5.",
+        "Run the mixed interleaved gauntlet.",
+        "Practice the wrong queue until it is empty twice.",
+        "Exit condition: explain every item in the invertible matrix checklist aloud."
+      ]
+    }
+  ],
+
+  lessons: [
+    {
+      id: "cofactor-basics",
+      title: "Guided 1: What a cofactor is",
+      source: "Hu et al. Section 4.1 Definition 4.1.1 + Lab Notes",
+      summary: "Plain English first: delete, sign, 2x2 determinant.",
+      steps: [
+        {
+          label: "Step 1 - Plain English",
+          body: "A cofactor is the determinant of what remains after you delete one row and one column, with a sign attached to its position."
+        },
+        {
+          label: "Step 2 - Sign pattern",
+          body: "The sign starts positive at position (1,1), then alternates like a checkerboard: + - + / - + - / + - +."
+        },
+        {
+          label: "Step 3 - Formula as shorthand",
+          body: "C_ij = (-1)^(i+j) det(A_ij). The exponent creates the sign. A_ij is the smaller matrix after deleting row i and column j."
+        },
+        {
+          label: "Step 4 - Example setup",
+          body: "For A = [[3,1,-4],[2,5,6],[1,4,8]], find C_32. Delete row 3 and column 2."
+        },
+        {
+          label: "Step 5 - Remaining matrix",
+          body: "A_32 = [[3,-4],[2,6]]. Position (3,2) has sign (-1)^(3+2) = (-1)^5 = -1."
+        },
+        {
+          label: "Step 6 - Write the math",
+          body: "C_32 = -det([[3,-4],[2,6]]) = -[3(6) - (-4)(2)] = -(18 + 8) = -26."
+        },
+        {
+          label: "Recall gate",
+          body: "Look away. Say: cofactor = position sign times determinant of the remaining submatrix. Then write the 3x3 sign grid from memory."
+        }
+      ]
+    },
+    {
+      id: "first-row-expansion",
+      title: "Guided 2: 3x3 determinant by cofactor expansion",
+      source: "Current MA123 Lab 6 notes + Hu et al. Example 4.1.4",
+      summary: "Every term shown; no skipped arithmetic.",
+      steps: [
+        {
+          label: "Step 1 - Problem",
+          body: "Find det(A) for A = [[1,-2,3],[-4,-5,-6],[7,-8,9]] using the first row."
+        },
+        {
+          label: "Step 2 - Expansion pattern",
+          body: "First-row signs are +, -, +. det(A) = a11 det(A_11) - a12 det(A_12) + a13 det(A_13)."
+        },
+        {
+          label: "Step 3 - Substitute entries",
+          body: "det(A) = 1 det([[-5,-6],[-8,9]]) - (-2) det([[-4,-6],[7,9]]) + 3 det([[-4,-5],[7,-8]])."
+        },
+        {
+          label: "Step 4 - Compute first 2x2",
+          body: "det([[-5,-6],[-8,9]]) = (-5)(9) - (-6)(-8) = -45 - 48 = -93."
+        },
+        {
+          label: "Step 5 - Compute second 2x2",
+          body: "det([[-4,-6],[7,9]]) = (-4)(9) - (-6)(7) = -36 + 42 = 6."
+        },
+        {
+          label: "Step 6 - Compute third 2x2",
+          body: "det([[-4,-5],[7,-8]]) = (-4)(-8) - (-5)(7) = 32 + 35 = 67."
+        },
+        {
+          label: "Step 7 - Combine",
+          body: "det(A) = 1(-93) - (-2)(6) + 3(67) = -93 + 12 + 201 = 120."
+        },
+        {
+          label: "Trap check",
+          body: "The middle sign is the trap. Because a12 = -2, the term is -(-2)(6), not +(-2)(6)."
+        }
+      ]
+    },
+    {
+      id: "smart-expansion",
+      title: "Guided 3: Choose the row or column with zeros",
+      source: "Hu et al. Section 4.2 Example 4.2.2",
+      summary: "Use zeros to reduce work.",
+      steps: [
+        {
+          label: "Step 1 - Problem",
+          body: "Compute det(A) where A = [[1,3,1,2],[0,1,0,0],[0,2,-2,0],[-1,2,1,1]]."
+        },
+        {
+          label: "Step 2 - Choose row",
+          body: "Row 2 has three zeros, so expand along row 2. Only a22 = 1 contributes."
+        },
+        {
+          label: "Step 3 - Sign and submatrix",
+          body: "Position (2,2) has positive sign. det(A) = 1 det([[1,1,2],[0,-2,0],[-1,1,1]])."
+        },
+        {
+          label: "Step 4 - Choose row again",
+          body: "In the 3x3 matrix, row 2 has two zeros. Expand along row 2. The entry is -2 at position (2,2), positive sign."
+        },
+        {
+          label: "Step 5 - Reduce to 2x2",
+          body: "det(A) = (-2) det([[1,2],[-1,1]])."
+        },
+        {
+          label: "Step 6 - Finish",
+          body: "det([[1,2],[-1,1]]) = 1(1) - 2(-1) = 1 + 2 = 3. So det(A) = -2(3) = -6."
+        }
+      ]
+    },
+    {
+      id: "row-operations",
+      title: "Guided 4: Row operations and determinant changes",
+      source: "Current Lab 6 notes + Hu et al. Theorem 4.2.10",
+      summary: "Preserve, scale, or flip.",
+      steps: [
+        {
+          label: "Step 1 - The three effects",
+          body: "Row replacement does not change det(A). Scaling one row by r multiplies det(A) by r. Swapping two rows changes the sign."
+        },
+        {
+          label: "Step 2 - Example matrix",
+          body: "Let det(A) = 5. If B is made by R3 <- R3 + 4R1, then det(B) = 5."
+        },
+        {
+          label: "Step 3 - Scaling",
+          body: "If C is made by R2 <- -2R2, then det(C) = (-2)det(A) = -10."
+        },
+        {
+          label: "Step 4 - Swap",
+          body: "If D is made by swapping R1 and R3, then det(D) = -det(A) = -5."
+        },
+        {
+          label: "Step 5 - Combined operations",
+          body: "If you swap once and then scale one row by 3, the determinant factor is (-1)(3) = -3. Starting from det(A)=5 gives -15."
+        },
+        {
+          label: "Recall gate",
+          body: "Say aloud: replace preserves, scale multiplies, swap flips. Then write one example of each."
+        }
+      ]
+    },
+    {
+      id: "invertibility",
+      title: "Guided 5: Determinants and invertibility",
+      source: "Current Lab 6 notes + Hu et al. Theorems 4.2.15 and 4.2.16",
+      summary: "det(A) decides the invertibility checklist for square matrices.",
+      steps: [
+        {
+          label: "Step 1 - Main condition",
+          body: "For an n x n matrix, det(A) != 0 means A is invertible. det(A) = 0 means A is singular."
+        },
+        {
+          label: "Step 2 - What det(A) != 0 also means",
+          body: "If det(A) != 0, then RREF(A) = I, rank(A) = n, the columns are linearly independent, and Ax=b has a unique solution for every b."
+        },
+        {
+          label: "Step 3 - What det(A)=0 does not mean",
+          body: "det(A)=0 does not automatically tell you 'no solution' or 'infinitely many' for Ax=b. It tells you no unique solution for every b."
+        },
+        {
+          label: "Step 4 - MATLAB connection",
+          body: "In MATLAB: det(A) checks singular/non-singular, rank(A) counts pivots, rref(A) shows whether the square matrix reduces to I."
+        },
+        {
+          label: "Step 5 - Pre-lab example",
+          body: "For magic(8), MATLAB gave detM = 0 and rankM = 3. Since rankM < 8, M is singular and M^-1 does not exist."
+        },
+        {
+          label: "Recall gate",
+          body: "Look away. Say the chain: det nonzero -> invertible -> RREF I -> rank n -> columns independent -> unique Ax=b for every b."
+        }
+      ]
+    }
+  ],
+
+  questions: [
+    {
+      id: "q01",
+      stage: "A",
+      type: "numeric",
+      source: "Hu et al. Example 4.1.3",
+      title: "Cofactor C_11",
+      prompt: "For A = [[3,1,-4],[2,5,6],[1,4,8]], find C_11.",
+      accepted: ["16"],
+      reteach: "Delete row 1 and column 1: [[5,6],[4,8]]. Sign at (1,1) is +. C_11 = 5(8)-6(4) = 40-24 = 16.",
+      solution: ["A_11 = [[5,6],[4,8]]", "C_11 = (+)det(A_11)", "C_11 = 5(8)-6(4) = 16"]
+    },
+    {
+      id: "q02",
+      stage: "A",
+      type: "numeric",
+      source: "Hu et al. Example 4.1.3",
+      title: "Cofactor C_32",
+      prompt: "For A = [[3,1,-4],[2,5,6],[1,4,8]], find C_32.",
+      accepted: ["-26"],
+      reteach: "Position (3,2) is negative. Delete row 3 and column 2: [[3,-4],[2,6]]. det = 3(6)-(-4)(2)=26. Cofactor = -26.",
+      solution: ["A_32 = [[3,-4],[2,6]]", "(-1)^(3+2) = -1", "C_32 = -[3(6)-(-4)(2)] = -26"]
+    },
+    {
+      id: "q03",
+      stage: "A",
+      type: "text",
+      source: "Current Lab 6 notes",
+      title: "Sign grid recall",
+      prompt: "Type the 3x3 cofactor sign grid row by row using + and -. Example format: +-+/-+-/+-+",
+      accepted: ["+-+/-+-/+-+", "+ - + / - + - / + - +"],
+      reteach: "Start at (1,1) with + and alternate. Corners and center are +. Edges are -.",
+      solution: ["Row 1: + - +", "Row 2: - + -", "Row 3: + - +"]
+    },
+    {
+      id: "q04",
+      stage: "A",
+      type: "numeric",
+      source: "Current Lab 6 notes",
+      title: "2x2 determinant",
+      prompt: "Find det([[4,7],[2,6]]).",
+      accepted: ["10"],
+      reteach: "For [[a,b],[c,d]], det = ad - bc. Here 4(6)-7(2)=24-14=10.",
+      solution: ["det = ad - bc", "det = 4(6)-7(2)", "det = 24-14 = 10"]
+    },
+    {
+      id: "q05",
+      stage: "A",
+      type: "numeric",
+      source: "Likely Lab 6 variant",
+      title: "Middle cofactor sign",
+      prompt: "For A = [[2,-1,5],[0,3,4],[7,1,-2]], find C_12.",
+      accepted: ["28"],
+      reteach: "Position (1,2) is negative. Delete row 1 column 2: [[0,4],[7,-2]]. det = 0(-2)-4(7)=-28. Cofactor = -(-28)=28.",
+      solution: ["A_12 = [[0,4],[7,-2]]", "C_12 = -det(A_12)", "C_12 = -[0(-2)-4(7)] = 28"]
+    },
+    {
+      id: "q06",
+      stage: "B",
+      type: "numeric",
+      source: "Current Lab 6 notes",
+      title: "Full 3x3 determinant",
+      prompt: "Find det([[1,-2,3],[-4,-5,-6],[7,-8,9]]) using first-row expansion.",
+      accepted: ["120"],
+      reteach: "Use + - + along row 1. The middle term is -(-2) times its 2x2 determinant.",
+      solution: ["det = 1[(-5)(9)-(-6)(-8)] - (-2)[(-4)(9)-(-6)(7)] + 3[(-4)(-8)-(-5)(7)]", "det = 1(-93) - (-2)(6) + 3(67)", "det = -93 + 12 + 201 = 120"]
+    },
+    {
+      id: "q07",
+      stage: "B",
+      type: "numeric",
+      source: "Hu et al. Example 4.1.4",
+      title: "Expansion with zero",
+      prompt: "Find det([[3,1,0],[-2,-4,3],[5,4,-2]]) using first-row expansion.",
+      accepted: ["-1"],
+      reteach: "The third term is zero. Compute 3[(-4)(-2)-3(4)] - 1[(-2)(-2)-3(5)].",
+      solution: ["det = 3det([[-4,3],[4,-2]]) - 1det([[-2,3],[5,-2]]) + 0", "det = 3(8-12) - (4-15)", "det = 3(-4) - (-11) = -1"]
+    },
+    {
+      id: "q08",
+      stage: "B",
+      type: "numeric",
+      source: "Hu et al. Example 4.2.2",
+      title: "4x4 smart expansion",
+      prompt: "Find det([[1,3,1,2],[0,1,0,0],[0,2,-2,0],[-1,2,1,1]]).",
+      accepted: ["-6"],
+      reteach: "Expand along row 2, then along row 2 of the 3x3. You get (-2)det([[1,2],[-1,1]]) = -2(3) = -6.",
+      solution: ["Expand row 2: det(A)=1det([[1,1,2],[0,-2,0],[-1,1,1]])", "Expand row 2 again: det(A)=(-2)det([[1,2],[-1,1]])", "det(A)=(-2)(1(1)-2(-1))=-6"]
+    },
+    {
+      id: "q09",
+      stage: "B",
+      type: "numeric",
+      source: "Hu et al. Example 4.1.8",
+      title: "Lower triangular determinant",
+      prompt: "A lower triangular matrix has diagonal entries -1, 3, 2, 1, -2. Find its determinant.",
+      accepted: ["12"],
+      reteach: "For triangular matrices, ignore everything off the diagonal. Multiply the diagonal entries.",
+      solution: ["det(A)=(-1)(3)(2)(1)(-2)", "det(A)=12"]
+    },
+    {
+      id: "q10",
+      stage: "B",
+      type: "numeric",
+      source: "Hu et al. Example 4.2.29(a)",
+      title: "Expand along sparse column",
+      prompt: "Find det([[1,0,-1,1],[2,0,0,1],[666,-3,-1,1000000],[1,0,0,1]]).",
+      accepted: ["3"],
+      reteach: "The second column has one nonzero entry: -3 at position (3,2), whose sign is negative. Continue with the sparse 3x3.",
+      solution: ["det(A)=(-3)(-1)^(3+2)det([[1,-1,1],[2,0,1],[1,0,1]])", "det(A)=3det([[1,-1,1],[2,0,1],[1,0,1]])", "Expand the 3x3 along column 2: det = 3[(-1)(-1)^(1+2)det([[2,1],[1,1]])]", "det = 3[(-1)(-1)(1)] = 3"]
+    },
+    {
+      id: "q11",
+      stage: "C",
+      type: "numeric",
+      source: "Current Lab 6 notes",
+      title: "Row replacement effect",
+      prompt: "If det(A)=7 and B is made from A by R3 <- R3 + 5R1, find det(B).",
+      accepted: ["7"],
+      reteach: "Adding a multiple of one row to another row does not change the determinant.",
+      solution: ["Row replacement preserves determinant", "det(B)=det(A)=7"]
+    },
+    {
+      id: "q12",
+      stage: "C",
+      type: "numeric",
+      source: "Current Lab 6 notes",
+      title: "Row swap effect",
+      prompt: "If det(A)=7 and B is made by swapping two rows of A, find det(B).",
+      accepted: ["-7"],
+      reteach: "One row swap changes the sign of the determinant.",
+      solution: ["One swap -> multiply determinant by -1", "det(B)=-det(A)=-7"]
+    },
+    {
+      id: "q13",
+      stage: "C",
+      type: "numeric",
+      source: "Current Lab 6 notes",
+      title: "Row scaling effect",
+      prompt: "If det(A)=7 and B is made by multiplying row 2 by -3, find det(B).",
+      accepted: ["-21"],
+      reteach: "Scaling one row by k scales the determinant by k.",
+      solution: ["R2 <- -3R2 means det(B)=(-3)det(A)", "det(B)=(-3)(7)=-21"]
+    },
+    {
+      id: "q14",
+      stage: "C",
+      type: "numeric",
+      source: "Likely Lab 6 variant",
+      title: "Combined operations",
+      prompt: "If det(A)=-4, B is made by one row swap, then R1 <- 2R1, then R3 <- R3 - 9R2. Find det(B).",
+      accepted: ["8"],
+      reteach: "Swap multiplies by -1. Scaling row 1 by 2 multiplies by 2. Row replacement does nothing.",
+      solution: ["Factor = (-1)(2)(1) = -2", "det(B)=(-2)det(A)", "det(B)=(-2)(-4)=8"]
+    },
+    {
+      id: "q15",
+      stage: "C",
+      type: "truefalse",
+      source: "Hu et al. Theorem 4.2.18",
+      title: "Transpose property",
+      prompt: "True or False: For every square matrix A, det(A^T)=det(A).",
+      accepted: ["true", "t"],
+      reteach: "Transpose does not change determinant for square matrices.",
+      solution: ["True", "det(A^T)=det(A)"]
+    },
+    {
+      id: "q16",
+      stage: "C",
+      type: "truefalse",
+      source: "Hu et al. Remark 4.2.27",
+      title: "Addition trap",
+      prompt: "True or False: det(A+B)=det(A)+det(B) for all square matrices A and B.",
+      accepted: ["false", "f"],
+      reteach: "There is no simple determinant rule for matrix addition. Product works; addition does not.",
+      solution: ["False", "Example from text: det(A)=1, det(B)=8, but det(A+B)=23, not 9."]
+    },
+    {
+      id: "q17",
+      stage: "C",
+      type: "numeric",
+      source: "Hu et al. Example 4.2.25",
+      title: "Scalar multiple of matrix",
+      prompt: "A is 3x3 and det(A)=5. Find det(-2A).",
+      accepted: ["-40"],
+      reteach: "For an n x n matrix, det(kA)=k^n det(A). Here n=3, so (-2)^3(5)=-8(5)=-40.",
+      solution: ["det(kA)=k^n det(A)", "det(-2A)=(-2)^3 det(A)", "det(-2A)=-8(5)=-40"]
+    },
+    {
+      id: "q18",
+      stage: "C",
+      type: "numeric",
+      source: "Hu et al. Corollary 4.2.26",
+      title: "Determinant of inverse",
+      prompt: "If det(A)=-4 and A is invertible, find det(A^-1).",
+      accepted: ["-1/4", "-0.25"],
+      reteach: "det(A^-1)=1/det(A), so det(A^-1)=1/(-4)=-1/4.",
+      solution: ["det(A^-1)=1/det(A)", "det(A^-1)=1/(-4)=-1/4"]
+    },
+    {
+      id: "q19",
+      stage: "C",
+      type: "numeric",
+      source: "Hu et al. Theorem 4.2.23",
+      title: "Product property",
+      prompt: "If det(A)=-2 and det(B)=6 for same-size square matrices, find det(AB).",
+      accepted: ["-12"],
+      reteach: "The determinant of a product equals the product of the determinants.",
+      solution: ["det(AB)=det(A)det(B)", "det(AB)=(-2)(6)=-12"]
+    },
+    {
+      id: "q20",
+      stage: "D",
+      type: "text",
+      source: "Current Lab 6 notes",
+      title: "Invertibility from determinant",
+      prompt: "A is 3x3 and det(A)=0. Type 'invertible' or 'singular'.",
+      accepted: ["singular", "not invertible", "non-invertible", "not invertible"],
+      reteach: "For square matrices, det(A)=0 means A is singular and A^-1 does not exist.",
+      solution: ["det(A)=0", "A is singular", "A^-1 does not exist"]
+    },
+    {
+      id: "q21",
+      stage: "D",
+      type: "truefalse",
+      source: "Hu et al. Theorem 4.2.16",
+      title: "Unique solution for every b",
+      prompt: "True or False: If det(A)!=0 for an n x n matrix, Ax=b has a unique solution for every b in R^n.",
+      accepted: ["true", "t"],
+      reteach: "This is one of the equivalent statements for square invertible matrices.",
+      solution: ["True", "det(A)!=0 -> A invertible -> unique solution for every b."]
+    },
+    {
+      id: "q22",
+      stage: "D",
+      type: "truefalse",
+      source: "MA123 Gemini Adaptive Prompt Guide trap",
+      title: "Singular system trap",
+      prompt: "True or False: If det(A)=0, then Ax=b always has infinitely many solutions.",
+      accepted: ["false", "f"],
+      reteach: "det(A)=0 means no unique solution for every b. Depending on b, a system can have no solutions or infinitely many.",
+      solution: ["False", "Counterexample: A=[[1,0],[0,0]], b=[[0],[1]] gives 0=1 in row 2, so no solution."]
+    },
+    {
+      id: "q23",
+      stage: "D",
+      type: "text",
+      source: "Current Lab 6 notes",
+      title: "Zero row in RREF",
+      prompt: "A is 3x3 and rref(A) has a zero row. What is det(A)?",
+      accepted: ["0", "zero"],
+      reteach: "A zero row in RREF means no pivot in every row, so A is singular and det(A)=0.",
+      solution: ["rref(A) has a zero row", "rank(A)<3", "det(A)=0"]
+    },
+    {
+      id: "q24",
+      stage: "D",
+      type: "text",
+      source: "MATLAB Grader pre-lab",
+      title: "MATLAB det command",
+      prompt: "In MATLAB, what command computes the determinant of matrix A?",
+      accepted: ["det(a)", "det(A)"],
+      reteach: "MATLAB uses det(A) for the determinant of A.",
+      solution: ["Command: det(A)"]
+    },
+    {
+      id: "q25",
+      stage: "D",
+      type: "numeric",
+      source: "MATLAB Grader pre-lab Q1",
+      title: "MATLAB matrix B determinant",
+      prompt: "For B = [[1,1,3],[3,2,6],[4,3,10]], find det(B).",
+      accepted: ["-1"],
+      reteach: "This is the pre-lab B matrix. Expanding row 1 gives -2 - 6 + 7 = -1.",
+      solution: ["det(B)=1det([[2,6],[3,10]]) - 1det([[3,6],[4,10]]) + 3det([[3,2],[4,3]])", "det(B)=1(20-18) - (30-24) + 3(9-8)", "det(B)=2-6+3=-1"]
+    },
+    {
+      id: "q26",
+      stage: "D",
+      type: "text",
+      source: "MATLAB Grader pre-lab Q2",
+      title: "Magic matrix conclusion",
+      prompt: "MATLAB gives detM=0 and rankM=3 for an 8x8 matrix M. Does M^-1 exist? Type yes or no.",
+      accepted: ["no", "no.", "does not exist"],
+      reteach: "For an 8x8 matrix, rank must be 8 to be invertible. rankM=3 and detM=0 mean M is singular.",
+      solution: ["detM=0", "rankM=3<8", "M is singular, so M^-1 does not exist."]
+    },
+    {
+      id: "q27",
+      stage: "B",
+      type: "numeric",
+      source: "Hu et al. Example 4.2.17",
+      title: "Invertible by determinant",
+      prompt: "Find det([[1,2,1],[2,2,0],[1,3,1]]).",
+      accepted: ["2"],
+      reteach: "Expand along row 1: det = 1(2) - 2(2) + 1(4) = 2.",
+      solution: ["det = det([[2,0],[3,1]]) - 2det([[2,0],[1,1]]) + det([[2,2],[1,3]])", "det = 2 - 2(2) + (6-2)", "det = 2 - 4 + 4 = 2"]
+    },
+    {
+      id: "q28",
+      stage: "B",
+      type: "numeric",
+      source: "Hu et al. Example 4.2.28(b)",
+      title: "Proportional columns",
+      prompt: "Find det([[1,-2,7],[-4,8,5],[2,-4,3]]).",
+      accepted: ["0"],
+      reteach: "Column 2 is -2 times column 1, so two columns are proportional and determinant is 0.",
+      solution: ["C2 = -2C1", "Proportional columns -> det(A)=0"]
+    },
+    {
+      id: "q29",
+      stage: "C",
+      type: "numeric",
+      source: "Hu et al. Example 4.2.22",
+      title: "Row-reduction determinant",
+      prompt: "Find det([[0,1,5],[3,-6,9],[2,6,5]]).",
+      accepted: ["153"],
+      reteach: "Track operations: one swap gives a negative, scaling R1 by 1/3 means carry a factor of 3, replacements preserve.",
+      solution: ["Swap R1<->R2: det(original) = -det([[3,-6,9],[0,1,5],[2,6,5]])", "Scale R1 by 1/3: det(original) = -3det([[1,-2,3],[0,1,5],[2,6,5]])", "R3<-R3-2R1 and R3<-R3-10R2 preserve", "det(original)=-3det([[1,-2,3],[0,1,5],[0,0,-51]])", "det(original)=(-3)(1)(1)(-51)=153"]
+    },
+    {
+      id: "q30",
+      stage: "D",
+      type: "truefalse",
+      source: "Hu et al. Theorem 4.2.16",
+      title: "Columns independent",
+      prompt: "True or False: For a square matrix A, det(A)!=0 is equivalent to the columns of A being linearly independent.",
+      accepted: ["true", "t"],
+      reteach: "For n x n matrices, det(A)!=0, invertibility, rank n, and independent columns are equivalent.",
+      solution: ["True", "This is one item in the invertible matrix theorem checklist."]
+    },
+    {
+      id: "q31",
+      stage: "A",
+      type: "numeric",
+      source: "Invented likely lab cofactor question",
+      title: "Cofactor C_23",
+      prompt: "For A = [[1,0,2],[-3,4,5],[6,1,-2]], find C_23.",
+      accepted: ["-1"],
+      reteach: "Position (2,3) is negative. Delete row 2 column 3: [[1,0],[6,1]]. det = 1. Cofactor = -1.",
+      solution: ["A_23 = [[1,0],[6,1]]", "(-1)^(2+3)=-1", "C_23=-[1(1)-0(6)] = -1"]
+    },
+    {
+      id: "q32",
+      stage: "B",
+      type: "numeric",
+      source: "Invented likely lab determinant question",
+      title: "Choose best column",
+      prompt: "Find det([[2,0,1],[3,0,-4],[5,7,2]]) by expanding along the column with most zeros.",
+      accepted: ["77"],
+      reteach: "Column 2 has two zeros. Only 7 at position (3,2) contributes. Its sign is negative. det([[2,1],[3,-4]])=-11, so -7(-11)=77.",
+      solution: ["Expand along column 2", "det(A)=7(-1)^(3+2)det([[2,1],[3,-4]])", "det(A)=-7[2(-4)-1(3)]", "det(A)=-7[-11]=77"]
+    },
+    {
+      id: "q34",
+      stage: "C",
+      type: "truefalse",
+      source: "Likely Lab 6 T/F",
+      title: "AB versus BA determinant",
+      prompt: "True or False: If A and B are same-size square matrices, det(AB)=det(BA), even if AB is not equal to BA.",
+      accepted: ["true", "t"],
+      reteach: "det(AB)=det(A)det(B)=det(B)det(A)=det(BA). Determinants turn products into numbers, and number multiplication commutes.",
+      solution: ["True", "det(AB)=det(A)det(B)=det(B)det(A)=det(BA)"]
+    },
+    {
+      id: "q35",
+      stage: "D",
+      type: "text",
+      source: "Current Lab 6 prep guide",
+      title: "Elementary row swap matrix",
+      prompt: "If E is made by swapping rows 1 and 2 of I_3, what does EA do to A?",
+      accepted: ["swaps rows 1 and 2", "swap rows 1 and 2", "swaps row 1 and row 2", "interchanges rows 1 and 2"],
+      reteach: "Left multiplication by an elementary matrix performs the matching row operation on A.",
+      solution: ["E is the row-swap elementary matrix", "EA swaps rows 1 and 2 of A"]
+    }
+  ]
+};
+
+</script>
+    <script>
+const STORAGE_KEY = "ma123-lab6-progress-v1";
+
+const state = {
+  progress: loadProgress(),
+  gauntlet: {
+    active: false,
+    queue: [],
+    index: 0,
+    correct: 0,
+    title: "Practice"
+  },
+  cofactorMatrix: [
+    [1, -2, 3],
+    [-4, -5, -6],
+    [7, -8, 9]
+  ],
+  rowOpMatrix: [
+    [3, -6, 9],
+    [0, 1, 5],
+    [2, 6, 5]
+  ],
+  rowOpFactor: 1,
+  rowOpNote: "Original determinant factor: 1"
+};
+
+function loadProgress() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+      completed: {},
+      wrong: {},
+      streak: 0
+    };
+  } catch {
+    return { completed: {}, wrong: {}, streak: 0 };
+  }
+}
+
+function saveProgress() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
+  renderDashboard();
+  renderWrongTracker();
+}
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function normalizeAnswer(value) {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[.,;:]$/g, "");
+}
+
+function answerMatches(input, question) {
+  const answer = normalizeAnswer(input);
+  if (!answer) return false;
+  return question.accepted.some((accepted) => normalizeAnswer(accepted) === answer);
+}
+
+function getQuestion(id) {
+  return APP_DATA.questions.find((question) => question.id === id);
+}
+
+function questionBank() {
+  return APP_DATA.questions;
+}
+
+function byStage(stage) {
+  return questionBank().filter((question) => question.stage === stage);
+}
+
+function interleavedQueue(stage) {
+  const main = byStage(stage);
+  const review = [];
+  if (stage === "B") review.push(...byStage("A").slice(0, 2));
+  if (stage === "C") review.push(byStage("A")[2], byStage("B")[0]);
+  if (stage === "D") review.push(byStage("A")[0], byStage("B")[1], byStage("C")[0]);
+  return weave(main, review.filter(Boolean));
+}
+
+function mixedQueue() {
+  const stages = ["A", "B", "C", "D"].map(byStage);
+  const maxLength = Math.max(...stages.map((stage) => stage.length));
+  const mixed = [];
+  for (let i = 0; i < maxLength; i += 1) {
+    stages.forEach((stage) => {
+      if (stage[i]) mixed.push(stage[i]);
+    });
+  }
+  return mixed;
+}
+
+function weave(main, review) {
+  const output = [];
+  main.forEach((question, index) => {
+    output.push(question);
+    if ((index + 1) % 3 === 0 && review.length) {
+      output.push(review.shift());
+    }
+  });
+  return output.concat(review);
+}
+
+function renderDashboard() {
+  const completed = Object.keys(state.progress.completed).length;
+  const wrongIds = Object.keys(state.progress.wrong);
+  $("completedCount").textContent = completed;
+  $("wrongCount").textContent = wrongIds.length;
+  $("streakCount").textContent = state.progress.streak;
+  $("reviewDue").textContent = wrongIds.length;
+}
+
+function renderPath() {
+  $("pathGrid").innerHTML = APP_DATA.stages
+    .map((stage) => `
+      <article class="path-card">
+        <div class="path-card__badge">${stage.id}</div>
+        <h3>${stage.title}</h3>
+        <p>${stage.goal}</p>
+        <ol>${stage.path.map((item) => `<li>${item}</li>`).join("")}</ol>
+        <button class="button button--small" data-stage-start="${stage.id}">Start ${stage.id}</button>
+      </article>
+    `)
+    .join("");
+}
+
+function renderLessons() {
+  $("lessonList").innerHTML = APP_DATA.lessons
+    .map((lesson) => `
+      <article class="lesson card" data-lesson="${lesson.id}">
+        <div class="lesson__header">
+          <div>
+            <p class="eyebrow">${lesson.source}</p>
+            <h3>${lesson.title}</h3>
+            <p>${lesson.summary}</p>
+          </div>
+          <button class="button button--small" data-lesson-reset="${lesson.id}">Restart</button>
+        </div>
+        <div class="lesson__steps" id="steps-${lesson.id}"></div>
+        <div class="lesson__actions">
+          <button class="button button--primary" data-lesson-next="${lesson.id}">Reveal next step</button>
+          <button class="button" data-lesson-all="${lesson.id}">Show all steps</button>
+        </div>
+      </article>
+    `)
+    .join("");
+
+  APP_DATA.lessons.forEach((lesson) => {
+    renderLessonSteps(lesson.id, 0);
+  });
+}
+
+function renderLessonSteps(lessonId, count) {
+  const lesson = APP_DATA.lessons.find((item) => item.id === lessonId);
+  const container = $(`steps-${lessonId}`);
+  const visible = Number(container.dataset.visible || count || 0);
+  container.dataset.visible = visible;
+  container.innerHTML = lesson.steps
+    .slice(0, visible)
+    .map((step, index) => `
+      <div class="step">
+        <div class="step__number">${index + 1}</div>
+        <div>
+          <h4>${step.label}</h4>
+          <p>${step.body}</p>
+        </div>
+      </div>
+    `)
+    .join("");
+  if (visible === 0) {
+    container.innerHTML = '<div class="empty-state">Click "Reveal next step." Do not rush: write each math line on paper before revealing the next one.</div>';
+  }
+}
+
+function renderPracticeList() {
+  const groups = ["A", "B", "C", "D"];
+  $("practiceList").innerHTML = groups
+    .map((stage) => {
+      const items = byStage(stage);
+      return `
+        <article class="practice-stage card">
+          <h3>Stage ${stage}</h3>
+          <div class="question-chips">
+            ${items
+              .map((question) => `
+                <button class="question-chip" data-single-question="${question.id}">
+                  <span>${question.title}</span>
+                  <small>${question.source}</small>
+                </button>
+              `)
+              .join("")}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderWrongTracker() {
+  const wrong = Object.entries(state.progress.wrong)
+    .map(([id, record]) => ({ question: getQuestion(id), record }))
+    .filter((item) => item.question);
+
+  if (!wrong.length) {
+    $("wrongTracker").innerHTML = '<div class="empty-state">No wrong answers yet. Start a gauntlet to create a retry queue.</div>';
+    return;
+  }
+
+  $("wrongTracker").innerHTML = wrong
+    .map(({ question, record }) => `
+      <article class="wrong-item">
+        <div>
+          <h3>${question.title}</h3>
+          <p>${question.prompt}</p>
+          <small>${question.source} | Missed ${record.count} time(s) | Last: ${record.lastAnswer || "IDK"}</small>
+        </div>
+        <button class="button button--small" data-single-question="${question.id}">Retry</button>
+      </article>
+    `)
+    .join("");
+}
+
+function renderCofactorViz() {
+  const row = Number($("cofactorRow").value);
+  const col = Number($("cofactorCol").value);
+  const matrix = state.cofactorMatrix;
+  const submatrix = matrix.filter((_, r) => r !== row).map((items) => items.filter((_, c) => c !== col));
+  const sign = (row + col + 2) % 2 === 0 ? "+" : "-";
+  const subdet = submatrix[0][0] * submatrix[1][1] - submatrix[0][1] * submatrix[1][0];
+  const cofactor = sign === "+" ? subdet : -subdet;
+
+  $("cofactorViz").innerHTML = `
+    <div>
+      <p class="viz-label">Original matrix</p>
+      ${matrixHtml(matrix, (r, c) => {
+        if (r === row && c === col) return "selected";
+        if (r === row || c === col) return "deleted";
+        return "";
+      })}
+    </div>
+    <div class="arrow">-></div>
+    <div>
+      <p class="viz-label">Remaining submatrix</p>
+      ${matrixHtml(submatrix)}
+    </div>
+  `;
+  $("cofactorText").textContent = `C_${row + 1}${col + 1} = ${sign} det([[${submatrix[0].join(", ")}], [${submatrix[1].join(", ")}]]) = ${cofactor}`;
+}
+
+function renderRowOpViz() {
+  $("rowOpViz").innerHTML = matrixHtml(state.rowOpMatrix);
+  $("detStatus").textContent = `${state.rowOpNote}. Current det factor relative to original: ${state.rowOpFactor}`;
+}
+
+function renderTriangularViz() {
+  const matrix = [
+    [-1, 0, 0, 0, 0],
+    ["5x", 3, 0, 0, 0],
+    ["x+6", 2, 2, 0, 0],
+    [4, -13, 0, 1, 0],
+    [0, "4x^2", 9, 6, -2]
+  ];
+  $("triangularViz").innerHTML = matrixHtml(matrix, (r, c) => (r === c ? "selected" : c > r ? "deleted" : ""));
+}
+
+function matrixHtml(matrix, classForCell = () => "") {
+  return `<div class="matrix">${matrix
+    .map((row, r) => `<div class="matrix__row">${row
+      .map((value, c) => `<span class="${classForCell(r, c)}">${value}</span>`)
+      .join("")}</div>`)
+    .join("")}</div>`;
+}
+
+function applyRowOperation(op) {
+  if (op === "reset") {
+    state.rowOpMatrix = [
+      [3, -6, 9],
+      [0, 1, 5],
+      [2, 6, 5]
+    ];
+    state.rowOpFactor = 1;
+    state.rowOpNote = "Original determinant factor: 1";
+  }
+  if (op === "replace") {
+    state.rowOpMatrix[2] = state.rowOpMatrix[2].map((value, index) => value - 2 * state.rowOpMatrix[0][index]);
+    state.rowOpNote = "Row replacement preserves the determinant";
+  }
+  if (op === "swap") {
+    [state.rowOpMatrix[0], state.rowOpMatrix[1]] = [state.rowOpMatrix[1], state.rowOpMatrix[0]];
+    state.rowOpFactor *= -1;
+    state.rowOpNote = "Row swap flips the determinant sign";
+  }
+  if (op === "scale") {
+    state.rowOpMatrix[1] = state.rowOpMatrix[1].map((value) => value * 3);
+    state.rowOpFactor *= 3;
+    state.rowOpNote = "Scaling one row by 3 multiplies the determinant by 3";
+  }
+  renderRowOpViz();
+}
+
+function startGauntlet(queue, title) {
+  state.gauntlet = {
+    active: true,
+    queue,
+    index: 0,
+    correct: 0,
+    title
+  };
+  $("gauntlet").classList.add("is-open");
+  $("gauntlet").setAttribute("aria-hidden", "false");
+  $("gauntletTitle").textContent = title;
+  $("pledgeCheck").checked = false;
+  $("pledgeBox").style.display = "block";
+  renderGauntletQuestion();
+}
+
+function renderGauntletQuestion(feedback = "") {
+  const question = state.gauntlet.queue[state.gauntlet.index];
+  const progress = `${state.gauntlet.index + 1}/${state.gauntlet.queue.length}`;
+  $("gauntletProgress").textContent = progress;
+
+  if (!question) {
+    finishGauntlet();
+    return;
+  }
+
+  const locked = !$("pledgeCheck").checked;
+  $("gauntletCard").innerHTML = `
+    <div class="source-line">${question.source} | Stage ${question.stage} | ${question.type.toUpperCase()}</div>
+    <h3>${question.title}</h3>
+    <p class="gauntlet-prompt">${question.prompt}</p>
+    ${locked ? '<div class="empty-state">Check the no-AI pledge to unlock the answer box.</div>' : answerForm(question)}
+    ${feedback}
+  `;
+}
+
+function answerForm(question) {
+  const label = question.type === "truefalse" ? "Type True or False" : "Enter your answer";
+  return `
+    <label class="answer-label">${label}
+      <input id="answerInput" class="answer-input" autocomplete="off" />
+    </label>
+    <div class="gauntlet-actions">
+      <button class="button button--primary" id="submitAnswer">Submit answer</button>
+      <button class="button" id="submitIdk">IDK</button>
+    </div>
+  `;
+}
+
+function submitCurrentAnswer(idk = false) {
+  const question = state.gauntlet.queue[state.gauntlet.index];
+  const input = idk ? "IDK" : ($("answerInput") ? $("answerInput").value : "");
+  if (!idk && !input.trim()) return;
+
+  if (!idk && answerMatches(input, question)) {
+    markCorrect(question);
+    state.gauntlet.correct += 1;
+    showCorrect(question);
+    return;
+  }
+
+  markWrong(question, input);
+  showWrong(question, idk);
+}
+
+function markCorrect(question) {
+  state.progress.completed[question.id] = {
+    at: new Date().toISOString()
+  };
+  delete state.progress.wrong[question.id];
+  state.progress.streak += 1;
+  saveProgress();
+}
+
+function markWrong(question, answer) {
+  const old = state.progress.wrong[question.id] || { count: 0 };
+  state.progress.wrong[question.id] = {
+    count: old.count + 1,
+    lastAnswer: answer,
+    at: new Date().toISOString()
+  };
+  state.progress.streak = 0;
+  saveProgress();
+}
+
+function showCorrect(question) {
+  const feedback = `
+    <div class="feedback feedback--correct">
+      <h4>Correct. Now check the full math.</h4>
+      ${solutionHtml(question)}
+      <button class="button button--primary" id="nextQuestion">Next question</button>
+    </div>
+  `;
+  renderGauntletQuestion(feedback);
+}
+
+function showWrong(question, idk) {
+  const retry = findRetry(question);
+  const feedback = `
+    <div class="feedback feedback--wrong">
+      <h4>${idk ? "IDK logged" : "Wrong or not exact enough"} - reteach before the next rep.</h4>
+      <p>${question.reteach}</p>
+      ${solutionHtml(question)}
+      <div class="mini-recall">
+        <strong>Say aloud:</strong> What rule did this problem require? Then write the key line on paper.
+      </div>
+      <button class="button button--primary" id="nextQuestion">Give me another question</button>
+    </div>
+  `;
+  if (retry && !state.gauntlet.queue.slice(state.gauntlet.index + 1).some((item) => item.id === retry.id)) {
+    state.gauntlet.queue.splice(state.gauntlet.index + 1, 0, retry);
+  }
+  renderGauntletQuestion(feedback);
+}
+
+function solutionHtml(question) {
+  return `<ol class="solution">${question.solution.map((line) => `<li>${line}</li>`).join("")}</ol>`;
+}
+
+function findRetry(question) {
+  return questionBank().find((item) => item.stage === question.stage && item.id !== question.id);
+}
+
+function nextQuestion() {
+  state.gauntlet.index += 1;
+  renderGauntletQuestion();
+}
+
+function finishGauntlet() {
+  $("gauntletCard").innerHTML = `
+    <div class="finish-card">
+      <h3>Gauntlet complete</h3>
+      <p>Score this run: ${state.gauntlet.correct}/${state.gauntlet.queue.length}</p>
+      <p>Now write the wrong-answer list on paper. Redo those without looking before tomorrow's lab.</p>
+      <button class="button button--primary" id="closeGauntlet">Return to study guide</button>
+      <button class="button" id="restartWrongFromFinish">Practice wrong queue now</button>
+    </div>
+  `;
+  $("gauntletProgress").textContent = "Done";
+}
+
+function closeGauntlet() {
+  $("gauntlet").classList.remove("is-open");
+  $("gauntlet").setAttribute("aria-hidden", "true");
+}
+
+function startWrongQueue() {
+  const wrongQueue = Object.keys(state.progress.wrong).map(getQuestion).filter(Boolean);
+  if (!wrongQueue.length) {
+    alert("No wrong answers in the tracker yet.");
+    return;
+  }
+  startGauntlet(wrongQueue, "Wrong-answer retry queue");
+}
+
+function wireEvents() {
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    const stageStart = target.dataset.stageStart;
+    const lessonNext = target.dataset.lessonNext;
+    const lessonAll = target.dataset.lessonAll;
+    const lessonReset = target.dataset.lessonReset;
+    const singleQuestion = target.closest("[data-single-question]")?.dataset.singleQuestion;
+    const rowOp = target.dataset.op;
+
+    if (stageStart) startGauntlet(interleavedQueue(stageStart), `Stage ${stageStart} gauntlet`);
+    if (lessonNext) {
+      const container = $(`steps-${lessonNext}`);
+      const lesson = APP_DATA.lessons.find((item) => item.id === lessonNext);
+      const next = Math.min(Number(container.dataset.visible || 0) + 1, lesson.steps.length);
+      container.dataset.visible = next;
+      renderLessonSteps(lessonNext, next);
+    }
+    if (lessonAll) {
+      const lesson = APP_DATA.lessons.find((item) => item.id === lessonAll);
+      const container = $(`steps-${lessonAll}`);
+      container.dataset.visible = lesson.steps.length;
+      renderLessonSteps(lessonAll, lesson.steps.length);
+    }
+    if (lessonReset) {
+      const container = $(`steps-${lessonReset}`);
+      container.dataset.visible = 0;
+      renderLessonSteps(lessonReset, 0);
+    }
+    if (singleQuestion) startGauntlet([getQuestion(singleQuestion)].filter(Boolean), "Single-question focus");
+    if (rowOp) applyRowOperation(rowOp);
+    if (target.id === "submitAnswer") submitCurrentAnswer(false);
+    if (target.id === "submitIdk") submitCurrentAnswer(true);
+    if (target.id === "nextQuestion") nextQuestion();
+    if (target.id === "closeGauntlet") closeGauntlet();
+    if (target.id === "restartWrongFromFinish") startWrongQueue();
+  });
+
+  $("cofactorRow").addEventListener("change", renderCofactorViz);
+  $("cofactorCol").addEventListener("change", renderCofactorViz);
+  $("pledgeCheck").addEventListener("change", () => {
+    $("pledgeBox").style.display = $("pledgeCheck").checked ? "none" : "block";
+    renderGauntletQuestion();
+  });
+  $("startGauntletHero").addEventListener("click", () => startGauntlet(mixedQueue(), "Mixed interleaved gauntlet"));
+  $("startStageA").addEventListener("click", () => startGauntlet(interleavedQueue("A"), "Stage A gauntlet"));
+  $("startStageB").addEventListener("click", () => startGauntlet(interleavedQueue("B"), "Stage B gauntlet"));
+  $("startStageC").addEventListener("click", () => startGauntlet(interleavedQueue("C"), "Stage C gauntlet"));
+  $("startMixed").addEventListener("click", () => startGauntlet(mixedQueue(), "Mixed interleaved gauntlet"));
+  $("startWrongQueue").addEventListener("click", startWrongQueue);
+  $("clearTracker").addEventListener("click", () => {
+    if (confirm("Clear all wrong-answer tracker data?")) {
+      state.progress.wrong = {};
+      state.progress.streak = 0;
+      saveProgress();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && $("gauntlet").classList.contains("is-open") && $("answerInput")) {
+      submitCurrentAnswer(false);
+    }
+  });
+}
+
+function init() {
+  renderPath();
+  renderLessons();
+  renderPracticeList();
+  renderDashboard();
+  renderWrongTracker();
+  renderCofactorViz();
+  renderRowOpViz();
+  renderTriangularViz();
+  wireEvents();
+}
+
+init();
+
+</script>
+  </body>
+</html>
