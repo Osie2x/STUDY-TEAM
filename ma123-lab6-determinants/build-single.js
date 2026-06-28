@@ -1,0 +1,73 @@
+const fs = require('fs');
+const css = fs.readFileSync('css/styles.css','utf8');
+const engine = fs.readFileSync('js/engine.js','utf8');
+const curriculum = fs.readFileSync('js/curriculum.js','utf8');
+const app = fs.readFileSync('js/app.js','utf8');
+
+const html = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MA123 · Lab 6 — Determinants (Guided Study App)</title>
+    <meta name="description" content="Interactive, visual, by-hand study app for MA123 Lab 6: determinants (Hu et al. §4.1 & §4.2)." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+    <style>
+${css}
+    </style>
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [["\\\\(", "\\\\)"]], displayMath: [["\\\\[", "\\\\]"]] },
+        svg: { fontCache: "global" },
+        options: { enableMenu: false },
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">∣A∣</span>
+        <span class="brand-text"><b>Determinants</b><small>MA123 · Lab 6 · Hu et al. §4.1–§4.2</small></span>
+      </div>
+      <div class="topbar-actions">
+        <button id="reset-progress" class="btn tiny ghost" title="Reset progress">↺ Reset</button>
+      </div>
+    </header>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-title">Your path</div>
+        <nav id="stage-map" class="stage-map"></nav>
+        <div class="sidebar-foot">Click any step to jump. The recommended order is top → bottom.</div>
+      </aside>
+      <main id="main" class="content"></main>
+    </div>
+    <div id="tracker" class="tracker">
+      <button id="tracker-toggle" class="tracker-toggle">⚠️ Wrong-Answer Tracker <span id="tracker-count" class="tracker-badge">0</span></button>
+      <div class="tracker-card">
+        <div class="tracker-head"><span>Concepts to re-drill</span><button id="tracker-clear" class="btn tiny ghost">clear</button></div>
+        <div id="tracker-body" class="tracker-body"></div>
+      </div>
+    </div>
+    <script>
+//<![CDATA[
+${engine}
+//]]>
+    </script>
+    <script>
+//<![CDATA[
+${curriculum}
+//]]>
+    </script>
+    <script>
+//<![CDATA[
+${app}
+//]]>
+    </script>
+  </body>
+</html>
+`;
+fs.writeFileSync('../MA123-Lab6-Determinants.html', html);
+console.log('wrote ../MA123-Lab6-Determinants.html  (' + html.length + ' bytes)');
