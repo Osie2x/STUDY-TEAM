@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MA123 Lab 6 Determinants Study App</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__content">
+        <p class="eyebrow">MA123 Spring Lab 6</p>
+        <h1>Determinants, Cofactors, Properties, and Invertibility</h1>
+        <p class="hero__lede">
+          Built from your current Lab 6 notes, Sections 4.1 and 4.2 of Hu et al.,
+          MATLAB Grader pre-lab material, and your study-style notes.
+        </p>
+        <div class="hero__actions">
+          <a class="button button--primary" href="#recommended-path">Start recommended path</a>
+          <button class="button" id="startGauntletHero">Start focus gauntlet</button>
+        </div>
+      </div>
+      <aside class="hero__panel">
+        <h2>How this app teaches you</h2>
+        <ul class="checklist">
+          <li>Plain idea first, formula second.</li>
+          <li>Every worked example reveals one step at a time.</li>
+          <li>Practice is interleaved: old skills return later.</li>
+          <li>Wrong answers create a retry queue and mini reteach.</li>
+          <li>Each problem lists its source or likely-lab origin.</li>
+        </ul>
+      </aside>
+    </header>
+
+    <main>
+      <section class="notice">
+        <strong>No AI help during gauntlet practice.</strong>
+        Use paper, your calculator, and MATLAB only where the question asks for MATLAB.
+        If you cannot start after 30 seconds, type <strong>IDK</strong>.
+      </section>
+
+      <section class="dashboard" aria-label="study dashboard">
+        <div class="metric">
+          <span id="completedCount">0</span>
+          <p>questions completed</p>
+        </div>
+        <div class="metric">
+          <span id="wrongCount">0</span>
+          <p>wrong/IDK tracked</p>
+        </div>
+        <div class="metric">
+          <span id="streakCount">0</span>
+          <p>current streak</p>
+        </div>
+        <div class="metric">
+          <span id="reviewDue">0</span>
+          <p>review items due</p>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="Study sections">
+        <a href="#recommended-path">Path</a>
+        <a href="#visual-lab">Visual Lab</a>
+        <a href="#guided-lessons">Guided</a>
+        <a href="#practice-library">Practice</a>
+        <a href="#tracker">Wrong Tracker</a>
+      </nav>
+
+      <section id="recommended-path" class="section">
+        <div class="section__header">
+          <p class="eyebrow">Recommended path</p>
+          <h2>Move in stages, but jump freely if you feel ready.</h2>
+        </div>
+        <div class="path-grid" id="pathGrid"></div>
+      </section>
+
+      <section id="visual-lab" class="section section--tinted">
+        <div class="section__header">
+          <p class="eyebrow">Visual Lab</p>
+          <h2>See what changes before you calculate.</h2>
+        </div>
+        <div class="visual-grid">
+          <article class="card visual-card">
+            <h3>Cofactor expansion visualizer</h3>
+            <p>Pick an entry. The app deletes that row and column, shows the sign, and writes the exact cofactor term.</p>
+            <div class="matrix-controls">
+              <label>Row
+                <select id="cofactorRow">
+                  <option value="0">1</option>
+                  <option value="1">2</option>
+                  <option value="2">3</option>
+                </select>
+              </label>
+              <label>Column
+                <select id="cofactorCol">
+                  <option value="0">1</option>
+                  <option value="1">2</option>
+                  <option value="2">3</option>
+                </select>
+              </label>
+            </div>
+            <div id="cofactorViz" class="cofactor-viz"></div>
+            <div id="cofactorText" class="formula-strip"></div>
+          </article>
+
+          <article class="card visual-card">
+            <h3>Row-operation determinant tracker</h3>
+            <p>Click operations and watch which ones change det(A). This targets the Lab 6 property list.</p>
+            <div class="operation-buttons">
+              <button data-op="replace">R3 <- R3 - 2R1</button>
+              <button data-op="swap">Swap R1 and R2</button>
+              <button data-op="scale">R2 <- 3R2</button>
+              <button data-op="reset">Reset</button>
+            </div>
+            <div id="rowOpViz" class="rowop-viz"></div>
+            <div id="detStatus" class="formula-strip"></div>
+          </article>
+
+          <article class="card visual-card">
+            <h3>Triangular shortcut</h3>
+            <p>For upper/lower triangular matrices, the diagonal is the whole determinant story.</p>
+            <div id="triangularViz" class="triangular-viz"></div>
+            <div class="formula-strip">det(A) = product of main diagonal = (-1)(3)(2)(1)(-2) = 12</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="guided-lessons" class="section">
+        <div class="section__header">
+          <p class="eyebrow">Guided reveal lessons</p>
+          <h2>Read, say it aloud, then reveal the next math line.</h2>
+        </div>
+        <div id="lessonList" class="lesson-list"></div>
+      </section>
+
+      <section id="practice-library" class="section section--tinted">
+        <div class="section__header">
+          <p class="eyebrow">Practice library</p>
+          <h2>All relevant questions, grouped and interleaved.</h2>
+          <p>
+            Each stage begins with two or three guided problems, then practice. When you finish
+            a later stage, the gauntlet automatically pulls older-stage review problems.
+          </p>
+        </div>
+        <div class="practice-actions">
+          <button class="button button--primary" id="startStageA">Start Stage A gauntlet</button>
+          <button class="button" id="startStageB">Start Stage B gauntlet</button>
+          <button class="button" id="startStageC">Start Stage C gauntlet</button>
+          <button class="button" id="startMixed">Start mixed interleaved gauntlet</button>
+        </div>
+        <div id="practiceList" class="practice-list"></div>
+      </section>
+
+      <section id="tracker" class="section">
+        <div class="section__header">
+          <p class="eyebrow">Wrong-answer tracker</p>
+          <h2>Your personal retry queue.</h2>
+          <p>Stored in this browser with localStorage. Clear it only when you can redo the problems cold on paper.</p>
+        </div>
+        <div class="tracker-actions">
+          <button class="button button--primary" id="startWrongQueue">Practice wrong queue</button>
+          <button class="button button--danger" id="clearTracker">Clear tracker</button>
+        </div>
+        <div id="wrongTracker" class="wrong-list"></div>
+      </section>
+    </main>
+
+    <div id="gauntlet" class="gauntlet" aria-hidden="true">
+      <div class="gauntlet__shell">
+        <div class="gauntlet__top">
+          <div>
+            <p class="eyebrow">Focus gauntlet</p>
+            <h2 id="gauntletTitle">Practice</h2>
+          </div>
+          <div class="gauntlet__progress" id="gauntletProgress"></div>
+        </div>
+        <div class="pledge" id="pledgeBox">
+          <label>
+            <input type="checkbox" id="pledgeCheck" />
+            I will use no AI help and will not go online. I will answer from my notes, paper work, MATLAB when asked, or type IDK.
+          </label>
+        </div>
+        <article class="gauntlet-card" id="gauntletCard"></article>
+      </div>
+    </div>
+
+    <script src="./data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
