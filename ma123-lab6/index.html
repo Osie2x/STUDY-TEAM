@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MA123 Lab 6 — Determinants Study Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+</head>
+<body>
+  <div class="hero">
+    <h1>MA123 Lab 6 — Determinants</h1>
+    <p class="subtitle">Sections 4.1 &amp; 4.2 · Hu et al. · Interactive study guide</p>
+    <div class="meta-bar">
+      <span class="pill">Estimated: <strong>~3.5 hours</strong> full path</span>
+      <span class="pill">Day Minimum: <strong>~45 min</strong> (through Stage A)</span>
+      <span class="pill" id="stat-pill">Progress: <strong>0%</strong></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <nav class="top-nav">
+      <a href="index.html">Hub</a>
+      <a href="learn.html?stage=guided-1">Learn &amp; Guided</a>
+      <a href="practice.html?stage=practice-a">Practice</a>
+      <a href="practice.html?stage=gauntlet">Gauntlet</a>
+    </nav>
+
+    <div class="card">
+      <h2>Recommended path</h2>
+      <ol style="line-height:1.9;font-size:1.05rem">
+        <li><strong>Concept visuals</strong> (7 ideas, ~10 min) — say each aloud</li>
+        <li><strong>Stage 0 — Guided warm-up</strong> (3 problems, every step on click)</li>
+        <li><strong>Stage A — Practice</strong> cofactors &amp; 2×2/3×3</li>
+        <li><strong>Stage B — Guided properties</strong> (optional skip after 2 problems)</li>
+        <li><strong>Stage C — Practice</strong> + interleaved review from A</li>
+        <li><strong>Stage D/E</strong> — row ops &amp; mixed problems</li>
+        <li><strong>Final Gauntlet</strong> — lockdown until correct</li>
+        <li><strong>Predicted lab questions</strong> — likely in-lab tasks</li>
+      </ol>
+      <p style="color:var(--text-muted)">You can click any stage freely — the path above is what we'd recommend for tomorrow.</p>
+    </div>
+
+    <div class="day-minimum" id="day-minimum-marker">
+      <strong>Day Minimum checkpoint</strong> — after Stage A practice you're not behind for lab prep.
+    </div>
+
+    <h2 style="margin:1.5rem 0 0.75rem">All stages</h2>
+    <div class="path-grid" id="stage-grid"></div>
+
+    <div class="card" style="margin-top:1.5rem">
+      <h2>Wrong-answer tracker</h2>
+      <p style="color:var(--text-muted)">Every miss is logged. Practice stages re-teach the concept and give you a variant.</p>
+      <ul class="wrong-log" id="wrong-log-hub"></ul>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-reset">Reset all progress</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>What this covers (from your Lab 6 notes)</h2>
+      <ul id="focus-list"></ul>
+      <p style="color:var(--text-muted);font-size:0.92rem;margin-top:1rem">
+        Sources: Lab Notes S26, Pre-Lab 6 MATLAB Grader, Textbook §4.1–4.2, Lab Prep Guide.
+        Topics outside Lab 6 scope (Cramer's Rule, adjoint beyond §4.2) are omitted.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>How to use offline</h2>
+      <p>Download the <code>ma123-lab6</code> folder. Open <code>index.html</code> in any browser — no server needed. Progress saves in your browser automatically.</p>
+    </div>
+  </div>
+
+  <script src="assets/problems.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    const grid = document.getElementById('stage-grid');
+    const badge = { guided: 'badge-guided', practice: 'badge-practice', gauntlet: 'badge-gauntlet' };
+
+    Lab6Problems.stages.forEach((stage) => {
+      const prog = stageProgress(stage);
+      const kind = stage.kind || 'practice';
+      const card = document.createElement('div');
+      card.className = 'card stage-card';
+      const learnHref = stage.kind === 'guided'
+        ? `learn.html?stage=${stage.id}`
+        : `practice.html?stage=${stage.id}`;
+      card.innerHTML = `
+        <span class="badge ${badge[kind] || 'badge-practice'}">${kind}</span>
+        <h3>${stage.name}</h3>
+        <p style="color:var(--text-muted);font-size:0.95rem">${stage.description || ''}</p>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${prog.pct}%"></div></div>
+        <p style="font-size:0.85rem;color:var(--text-muted)">${prog.done}/${prog.total} problems</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="${learnHref}">Open →</a>
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    document.getElementById('focus-list').innerHTML = Lab6Problems.meta.focus
+      .map((f) => `<li>${f}</li>`).join('');
+
+    function refreshStats() {
+      const all = Lab6Problems.stages.reduce((n, s) => n + getStageProblems(s).length, 0);
+      const st = Lab6Store.getStats();
+      const pct = all ? Math.round((st.total / all) * 100) : 0;
+      document.getElementById('stat-pill').innerHTML = `Progress: <strong>${pct}%</strong>`;
+      const log = Lab6Store.load().wrongLog.slice(-12).reverse();
+      document.getElementById('wrong-log-hub').innerHTML = log.length
+        ? log.map((w) => `<li><strong>${w.id}</strong> at ${new Date(w.at).toLocaleString()}</li>`).join('')
+        : '<li>No wrong answers logged yet.</li>';
+    }
+    refreshStats();
+
+    document.getElementById('btn-reset').onclick = () => {
+      if (confirm('Clear all saved progress?')) { Lab6Store.reset(); location.reload(); }
+    };
+  </script>
+</body>
+</html>
