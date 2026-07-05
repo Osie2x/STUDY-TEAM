@@ -1,0 +1,2457 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MA123 Lab 7 — Span, Independence & Rank</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+/* =========================================================
+   MA123 Lab 6 — Determinants  ::  Styles
+   Big, clean, calm. One thing in focus at a time.
+========================================================= */
+:root {
+  --bg: #0f1226;
+  --bg2: #151a36;
+  --panel: #ffffff;
+  --ink: #1a1f36;
+  --ink-soft: #51597a;
+  --line: #e7e9f3;
+  --brand: #5b6cff;
+  --brand-deep: #3b46d6;
+  --accent: #ff8a4c;
+  --green: #16a34a;
+  --green-soft: #dcfce7;
+  --red: #dc2626;
+  --red-soft: #fee2e2;
+  --gold: #f5b301;
+  --gold-soft: #fff3cf;
+  --shadow: 0 18px 50px rgba(20, 24, 60, 0.18);
+  --radius: 20px;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 85% -10%, #2a2f63 0%, transparent 55%),
+    radial-gradient(900px 500px at -5% 110%, #21264f 0%, transparent 55%),
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+body.locked { overflow: hidden; }
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 26px;
+  background: rgba(15, 18, 38, 0.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.brand { display: flex; align-items: center; gap: 14px; color: #fff; }
+.brand-mark {
+  font-family: var(--mono); font-weight: 600; font-size: 20px;
+  background: linear-gradient(135deg, var(--brand), var(--accent));
+  width: 44px; height: 44px; border-radius: 13px;
+  display: grid; place-items: center; box-shadow: var(--shadow);
+}
+.brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-text b { font-size: 18px; letter-spacing: .2px; }
+.brand-text small { color: #aab0d8; font-size: 12px; }
+
+/* ---------- layout ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: 268px 1fr;
+  gap: 26px;
+  max-width: 1320px;
+  margin: 26px auto;
+  padding: 0 26px 90px;
+}
+
+/* ---------- sidebar ---------- */
+.sidebar {
+  position: sticky; top: 86px; align-self: start;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  max-height: calc(100vh - 110px);
+  overflow: auto;
+}
+.sidebar-title {
+  color: #c7ccef; font-size: 12px; text-transform: uppercase;
+  letter-spacing: 1.4px; font-weight: 700; padding: 4px 10px 12px;
+}
+.stage-map { display: flex; flex-direction: column; gap: 4px; }
+.map-item {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; text-align: left; cursor: pointer;
+  background: transparent; border: 0; color: #d8dbf2;
+  padding: 9px 10px; border-radius: 12px; font-size: 14px;
+  transition: background .15s, transform .1s;
+}
+.map-item:hover { background: rgba(255, 255, 255, 0.07); }
+.map-item.active { background: linear-gradient(135deg, var(--brand), var(--brand-deep)); color: #fff; box-shadow: var(--shadow); }
+.map-item.stage-start { margin-top: 10px; }
+.map-icon {
+  width: 28px; height: 28px; border-radius: 9px; flex: none;
+  display: grid; place-items: center; font-size: 13px; font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+}
+.map-item.active .map-icon { background: rgba(255, 255, 255, 0.22); }
+.map-text { display: flex; flex-direction: column; line-height: 1.2; flex: 1; }
+.map-title { font-weight: 600; }
+.map-sub { font-size: 11px; opacity: .7; }
+.map-check { color: #7ef0b0; font-weight: 700; }
+.map-item.complete .map-icon { background: var(--green-soft); color: var(--green); }
+.sidebar-foot { color: #8c92bd; font-size: 11.5px; padding: 14px 10px 4px; line-height: 1.5; }
+
+/* ---------- content cards ---------- */
+.content { min-width: 0; }
+.card {
+  background: var(--panel); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 34px 38px; margin-bottom: 20px;
+}
+.hero { padding: 44px 46px; }
+.kicker {
+  color: var(--brand-deep); font-weight: 700; font-size: 13px;
+  letter-spacing: 1.6px; text-transform: uppercase; margin-bottom: 8px;
+}
+h1 { font-family: "Fraunces", serif; font-size: 46px; line-height: 1.05; margin: 0 0 14px; letter-spacing: -.5px; }
+h2 { font-family: "Fraunces", serif; font-size: 32px; margin: 0 0 6px; letter-spacing: -.3px; color: #fff; }
+h3 { font-family: "Fraunces", serif; font-size: 23px; margin: 0 0 10px; }
+.lede { font-size: 19px; color: var(--ink-soft); line-height: 1.55; max-width: 60ch; }
+
+.meta-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0; }
+.meta-pill {
+  background: #f3f4fb; color: var(--ink); border: 1px solid var(--line);
+  padding: 9px 15px; border-radius: 999px; font-size: 14px; font-weight: 500;
+}
+.how { background: #f7f8ff; border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; margin-top: 8px; }
+.how h3 { margin-top: 0; }
+.how ul { margin: 0; padding-left: 20px; line-height: 1.7; color: var(--ink-soft); }
+.how b { color: var(--ink); }
+.recommend { margin-top: 18px; font-size: 15px; color: var(--ink-soft); }
+
+/* node headers sit on the dark bg */
+.node-head { color: #fff; margin: 4px 4px 18px; }
+.node-head .kicker { color: #aab0ff; }
+.node-head .tagline, .tagline { color: #c2c7ee; font-size: 17px; line-height: 1.5; max-width: 70ch; }
+
+/* ---------- two-panel stage layout ---------- */
+.stage-grid {
+  display: grid; grid-template-columns: 1.05fr .95fr; gap: 0;
+  background: var(--panel); border-radius: var(--radius);
+  box-shadow: var(--shadow); overflow: hidden; min-height: 440px;
+}
+.panel { padding: 30px 32px; }
+.text-panel { border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+.viz-panel { background: linear-gradient(160deg, #f7f8ff, #eef0fb); display: grid; place-items: center; }
+
+/* ---------- step player ---------- */
+.step-dots { display: flex; gap: 7px; margin-bottom: 18px; }
+.dot { width: 26px; height: 6px; border-radius: 99px; background: var(--line); transition: background .25s; }
+.dot.on { background: var(--brand); }
+.step-title { font-family: "Fraunces", serif; font-size: 20px; font-weight: 600; margin-bottom: 12px; color: var(--brand-deep); }
+.step-body { font-size: 18px; line-height: 1.62; color: var(--ink); flex: 1; }
+.step-body b { color: var(--ink); }
+.step-body ul { padding-left: 18px; }
+.step-nav { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+.step-counter { color: var(--ink-soft); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto; }
+
+.prob-intro { font-size: 18px; line-height: 1.6; margin: 12px 0 0; }
+
+/* ---------- buttons ---------- */
+.btn {
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  border: 0; border-radius: 12px; padding: 12px 20px; cursor: pointer;
+  transition: transform .1s, box-shadow .15s, background .15s; color: #fff;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: linear-gradient(135deg, var(--brand), var(--brand-deep)); box-shadow: 0 10px 24px rgba(91, 108, 255, .35); }
+.btn.primary:hover { box-shadow: 0 14px 30px rgba(91, 108, 255, .45); }
+.btn.accent { background: linear-gradient(135deg, var(--accent), #f2682f); box-shadow: 0 10px 24px rgba(255, 138, 76, .35); }
+.btn.ghost { background: #eef0fb; color: var(--ink); }
+.btn.ghost:hover { background: #e2e5f6; }
+.btn.big { font-size: 17px; padding: 15px 28px; }
+.btn.tiny { font-size: 12.5px; padding: 7px 12px; border-radius: 9px; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.idk { background: #fff4e6; color: #b45309; border: 1px dashed #f0b878; margin-top: 10px; width: 100%; }
+.btn.idk:hover { background: #ffedd6; }
+
+.node-foot { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+.ok-note { background: var(--green-soft); color: #136a37; padding: 12px 16px; border-radius: 12px; font-weight: 500; }
+
+/* ---------- guided controls ---------- */
+.guided-controls { margin-top: 18px; }
+.guided-progress { display: flex; gap: 8px; margin-bottom: 14px; }
+.gdot {
+  width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.08); color: #fff; font-weight: 700; cursor: pointer; font-size: 15px;
+}
+.gdot.on { background: linear-gradient(135deg, var(--brand), var(--brand-deep)); border-color: transparent; }
+.gdot.seen { background: var(--green-soft); color: var(--green); border-color: transparent; }
+.guided-btnrow { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* ---------- source tags ---------- */
+.src-tag {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .3px;
+  padding: 4px 11px; border-radius: 999px; margin-bottom: 4px;
+}
+.tag-lab { background: var(--gold-soft); color: #8a6400; }
+.tag-book { background: #e8edff; color: var(--brand-deep); }
+.tag-pred { background: #ffe9e0; color: #c2410c; }
+
+/* ---------- matrix visualizer ---------- */
+.viz-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; width: 100%; }
+.viz-empty { font-size: 54px; opacity: .35; }
+.mx {
+  display: inline-grid; gap: 7px; padding: 14px;
+  background: #fff; border-radius: 16px; box-shadow: 0 8px 22px rgba(30,40,90,.1);
+  border: 1px solid var(--line);
+  position: relative;
+}
+.mx-cell {
+  font-family: var(--mono); font-size: 22px; font-weight: 600;
+  width: 50px; height: 50px; display: grid; place-items: center;
+  background: #f5f6fc; border-radius: 10px; color: var(--ink);
+  transition: all .25s;
+}
+.mx-cell.hl { background: var(--gold); color: #1a1300; transform: scale(1.12); box-shadow: 0 6px 16px rgba(245,179,1,.5); z-index: 2; }
+.mx-cell.dim { opacity: .22; }
+.mx-cell.diag { background: var(--brand); color: #fff; box-shadow: 0 4px 12px rgba(91,108,255,.4); }
+.mx-cell.green { background: var(--green-soft); color: var(--green); }
+.mx-cell.red { background: var(--red-soft); color: var(--red); }
+.mx-cell.changed { background: #fff3cf; color: #8a6400; }
+.mx-cell.sign { font-size: 26px; }
+.mx-cell.sign.pos { color: var(--green); background: var(--green-soft); }
+.mx-cell.sign.neg { color: var(--red); background: var(--red-soft); }
+
+.viz-legend { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.chip { font-size: 13px; font-weight: 600; padding: 6px 13px; border-radius: 999px; background: #eef0fb; color: var(--ink-soft); }
+.chip.green { background: var(--green-soft); color: var(--green); }
+.chip.red { background: var(--red-soft); color: var(--red); }
+.chip.diag-chip { background: #e8edff; color: var(--brand-deep); }
+.viz-arrow { color: var(--ink-soft); font-size: 14px; font-weight: 600; }
+.viz-minor-wrap { display: flex; align-items: center; gap: 12px; }
+.sign-badge { font-size: 30px; font-weight: 800; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; }
+.sign-badge.pos { background: var(--green-soft); color: var(--green); }
+.sign-badge.neg { background: var(--red-soft); color: var(--red); }
+.viz-result { font-family: "Fraunces", serif; font-size: 30px; font-weight: 700; color: var(--brand-deep); background: #fff; padding: 10px 22px; border-radius: 14px; box-shadow: var(--shadow); }
+
+/* row operation viz */
+.rowop { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.rowop-mid { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 120px; }
+.rowop-op { font-size: 15px; }
+.rowop-arrow { font-size: 26px; color: var(--ink-soft); }
+.rowop-effect { font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: 999px; }
+.effect-ok { background: var(--green-soft); color: var(--green); }
+.effect-flip { background: var(--red-soft); color: var(--red); }
+.effect-scale { background: var(--gold-soft); color: #8a6400; }
+.sign-grid .mx-cell { width: 44px; height: 44px; }
+
+/* ---------- gate cards ---------- */
+.gate { text-align: center; padding: 44px; }
+.gate-icon { font-size: 50px; margin-bottom: 6px; }
+.gate p { color: var(--ink-soft); font-size: 16px; line-height: 1.6; max-width: 52ch; margin: 10px auto; }
+.gate .warn { color: var(--red); font-weight: 700; background: var(--red-soft); display: inline-block; padding: 9px 18px; border-radius: 12px; }
+.gate .btn { margin-top: 18px; }
+.gate.review { border-top: 4px solid var(--brand); }
+.gate.boss { border-top: 4px solid var(--gold); }
+
+/* ---------- gauntlet modal ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(10, 12, 30, 0.82); backdrop-filter: blur(6px);
+  display: grid; place-items: center; padding: 24px; overflow: auto;
+}
+.modal {
+  background: var(--panel); border-radius: 24px; box-shadow: var(--shadow);
+  width: min(760px, 100%); padding: 30px 34px; max-height: 92vh; overflow: auto;
+}
+.modal-top { display: flex; justify-content: space-between; align-items: center; color: var(--ink-soft); font-size: 13px; font-weight: 600; }
+.modal-context { color: var(--brand-deep); text-transform: uppercase; letter-spacing: 1px; }
+.lock-note { margin: 14px 0; background: #fff4e6; color: #b45309; font-weight: 600; font-size: 13.5px; padding: 9px 14px; border-radius: 10px; text-align: center; }
+.qcard { background: #f7f8ff; border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; }
+.qprompt { font-size: 20px; line-height: 1.5; }
+.qmatrix { text-align: center; font-size: 20px; margin-top: 8px; }
+
+.answer-zone { margin-top: 20px; }
+.num-row { display: flex; gap: 10px; }
+.num-input {
+  flex: 1; font-family: var(--mono); font-size: 20px; padding: 14px 16px;
+  border: 2px solid var(--line); border-radius: 12px; outline: none;
+}
+.num-input:focus { border-color: var(--brand); }
+.tf-row { display: flex; gap: 12px; }
+.tf-row .choice { flex: 1; }
+.mc-list { display: flex; flex-direction: column; gap: 10px; }
+.btn.choice { background: #eef0fb; color: var(--ink); font-size: 17px; padding: 16px 18px; text-align: left; border: 2px solid transparent; }
+.btn.choice:hover { border-color: var(--brand); background: #e6e9fb; }
+.btn.choice.mc { font-family: var(--mono); }
+
+/* feedback */
+.feedback { margin-top: 18px; display: none; }
+.feedback.show { display: block; }
+.feedback.ok-fb { color: var(--green); font-size: 22px; font-weight: 700; }
+.feedback.bad-fb { color: var(--red); font-size: 18px; font-weight: 700; }
+.feedback.warn-fb { color: #b45309; font-weight: 600; }
+.spacer { height: 14px; }
+.reteach { margin-top: 14px; background: #f7f8ff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; color: var(--ink); font-weight: 400; font-size: 16px; }
+.reteach-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.reteach-viz { display: grid; place-items: center; background: #fff; border-radius: 14px; padding: 14px; min-height: 160px; }
+.reteach-plain { line-height: 1.6; }
+
+/* ---------- wrong-answer tracker ---------- */
+.tracker { position: fixed; right: 22px; bottom: 22px; z-index: 40; width: 320px; max-width: calc(100vw - 44px); }
+.tracker-toggle {
+  width: 100%; background: linear-gradient(135deg, #ff7a59, #ef4444); color: #fff;
+  border: 0; border-radius: 14px; padding: 13px 16px; font-weight: 700; font-size: 14px;
+  cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px;
+}
+.tracker-badge { margin-left: auto; background: rgba(255,255,255,.25); border-radius: 999px; padding: 2px 10px; font-variant-numeric: tabular-nums; }
+.tracker-card { display: none; background: #fff; border-radius: 16px; box-shadow: var(--shadow); margin-top: 8px; overflow: hidden; }
+.tracker.open .tracker-card { display: block; }
+.tracker-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 14px; }
+.tracker-body { max-height: 40vh; overflow: auto; padding: 8px; }
+.tracker-empty { padding: 20px; text-align: center; color: var(--ink-soft); font-weight: 600; }
+.tracker-empty span { font-weight: 400; font-size: 13px; display: block; margin-top: 6px; }
+.tracker-row { display: flex; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; }
+.tracker-row:hover { background: #f5f6fc; }
+.tracker-label { color: var(--ink); }
+.tracker-n { color: var(--red); font-weight: 700; }
+
+/* ---------- exam mode ---------- */
+.exam-timer { text-align: center; font-family: var(--mono); font-weight: 600; font-size: 15px; color: var(--brand-deep); background: #eef0fb; border-radius: 10px; padding: 6px 12px; margin: 10px auto 0; width: fit-content; }
+.exam-timer.over { color: var(--red); background: var(--red-soft); }
+.exam-score { text-align: center; font-family: "Fraunces", serif; font-size: 34px; font-weight: 700; color: var(--brand-deep); margin: 16px 0; }
+.exam-allright { text-align: center; font-size: 18px; color: var(--green); font-weight: 600; }
+.exam-review-intro { text-align: center; color: var(--ink-soft); font-size: 15px; }
+.followup { margin-top: 16px; border-top: 2px dashed var(--line); padding-top: 14px; }
+.followup-head { font-weight: 700; color: var(--accent); margin-bottom: 10px; }
+.num-input.err { border-color: var(--red); }
+.mini-note { display: block; font-size: 13px; color: var(--ink-soft); font-weight: 400; margin-top: 4px; }
+
+/* ---------- index / study hub ---------- */
+.idx-block { background: #f7f8ff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; margin: 14px 0; }
+.idx-block h3 { margin: 0 0 6px; }
+.idx-block p { color: var(--ink-soft); margin: 0 0 12px; font-size: 15px; line-height: 1.55; }
+.idx-block.tip { background: var(--gold-soft); border-color: #f0d98a; }
+.idx-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.idx-link { text-decoration: none; display: inline-block; }
+
+/* ---------- animation ---------- */
+.fade { animation: fade .35s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- responsive ---------- */
+@media (max-width: 980px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; max-height: none; flex-direction: row; }
+  .stage-map { flex-direction: row; flex-wrap: wrap; }
+  .map-item { width: auto; }
+  .map-sub, .sidebar-foot, .sidebar-title { display: none; }
+  .stage-grid { grid-template-columns: 1fr; }
+  .text-panel { border-right: 0; border-bottom: 1px solid var(--line); }
+  h1 { font-size: 36px; }
+}
+@media (max-width: 560px) {
+  .card, .hero { padding: 24px 22px; }
+  .panel { padding: 22px; }
+  .mx-cell { width: 42px; height: 42px; font-size: 18px; }
+}
+
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"]]},svg:{fontCache:"global"},options:{enableMenu:false}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head><body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">MA<br>123</span>
+    <span class="brand-text"><b>MA123 Study</b><small>Intro Linear Algebra · Hu et al.</small></span></div>
+  <div class="topbar-actions"><a class="btn tiny ghost" href="00-START-HERE-Study-Plan.html">⌂ Index</a>
+    <button id="reset-progress" class="btn tiny ghost" title="Reset progress">↺ Reset</button></div>
+</header>
+<div class="layout">
+  <aside class="sidebar"><div class="sidebar-title">Your path</div>
+    <nav id="stage-map" class="stage-map"></nav>
+    <div class="sidebar-foot">Click any step to jump. Recommended order is top → bottom.</div></aside>
+  <main id="main" class="content"></main>
+</div>
+<div id="tracker" class="tracker">
+  <button id="tracker-toggle" class="tracker-toggle">⚠️ Wrong-Answer Tracker <span id="tracker-count" class="tracker-badge">0</span></button>
+  <div class="tracker-card"><div class="tracker-head"><span>Concepts to re-drill</span>
+    <button id="tracker-clear" class="btn tiny ghost">clear</button></div>
+    <div id="tracker-body" class="tracker-body"></div></div>
+</div>
+<script>
+//<![CDATA[
+/* ===================================================================
+   MA123 Lab 6 — Determinants Engine
+   Pure math: determinant computation + verified step-by-step solution
+   generators + interactive-matrix visualization state builders.
+
+   Everything in here is data-in / data-out. The UI layer (app.js)
+   turns the returned "step" objects into the on-screen step player.
+   Keeping the math here means every guided walkthrough AND every
+   auto-generated practice/reteach solution is guaranteed correct.
+=================================================================== */
+
+const Engine = (() => {
+  /* ---------- number formatting helpers ---------- */
+  const fmt = (n) => {
+    // pass strings (symbolic entries like "x") straight through
+    if (typeof n !== "number") return String(n);
+    // keep small fractions readable, otherwise integers
+    if (Number.isInteger(n)) return String(n);
+    const r = Math.round(n * 1000) / 1000;
+    return String(r);
+  };
+  // wrap negatives in parentheses for clean multiplication display
+  const paren = (n) => (n < 0 ? `(${fmt(n)})` : fmt(n));
+
+  /* ---------- matrix helpers ---------- */
+  const clone = (M) => M.map((row) => row.slice());
+  const size = (M) => M.length;
+
+  const minor = (M, i, j) =>
+    M.filter((_, r) => r !== i).map((row) => row.filter((_, c) => c !== j));
+
+  // recursive determinant via first-row cofactor expansion (exact for ints)
+  const det = (M) => {
+    const n = M.length;
+    if (n === 1) return M[0][0];
+    if (n === 2) return M[0][0] * M[1][1] - M[0][1] * M[1][0];
+    let total = 0;
+    for (let j = 0; j < n; j++) {
+      const sign = j % 2 === 0 ? 1 : -1;
+      total += sign * M[0][j] * det(minor(M, 0, j));
+    }
+    return total;
+  };
+
+  /* ---------- LaTeX matrix rendering ---------- */
+  // kind: 'b' => bmatrix (brackets), 'v' => vmatrix (det bars)
+  const latexMatrix = (M, kind = "b", highlight = null) => {
+    const env = kind === "v" ? "vmatrix" : "bmatrix";
+    const body = M.map((row, r) =>
+      row
+        .map((val, c) => {
+          let cell = fmt(val);
+          if (
+            highlight &&
+            highlight.r === r &&
+            (highlight.c === undefined || highlight.c === c)
+          ) {
+            cell = `\\boxed{${cell}}`;
+          }
+          return cell;
+        })
+        .join(" & ")
+    ).join(" \\\\ ");
+    return `\\begin{${env}}${body}\\end{${env}}`;
+  };
+
+  const tex = (s) => `\\(${s}\\)`;
+  const texBlock = (s) => `\\[${s}\\]`;
+
+  /* ===================================================================
+     STEP GENERATORS
+     A "step" = { title, html, viz } where viz is an optional config the
+     visualizer in app.js can render (highlighting / crossing out cells).
+  =================================================================== */
+
+  /* ----- 2x2 determinant, fully worked ----- */
+  const steps2x2 = (M) => {
+    const [[a, b], [c, d]] = M;
+    const result = a * d - b * c;
+    return {
+      result,
+      steps: [
+        {
+          title: "Set up the 2×2 rule",
+          html: `A 2×2 determinant is the <b>down-diagonal product minus the up-diagonal product</b>.
+                 ${texBlock(`\\det${latexMatrix(M, "b")} = ad - bc`)}`,
+          viz: { type: "two", M, phase: "setup" },
+        },
+        {
+          title: "Mark the diagonals",
+          html: `Green diagonal (top-left → bottom-right) is <b>+ad</b>.
+                 Red diagonal (top-right → bottom-left) is <b>−bc</b>.`,
+          viz: { type: "two", M, phase: "diagonals" },
+        },
+        {
+          title: "Substitute the numbers",
+          html: texBlock(
+            `\\det(A) = (${fmt(a)})(${fmt(d)}) - (${fmt(b)})(${fmt(c)})`
+          ),
+          viz: { type: "two", M, phase: "diagonals" },
+        },
+        {
+          title: "Compute",
+          html: texBlock(
+            `\\det(A) = ${fmt(a * d)} - (${fmt(b * c)}) = \\mathbf{${fmt(
+              result
+            )}}`
+          ),
+          viz: { type: "two", M, phase: "result", result },
+        },
+      ],
+    };
+  };
+
+  /* ----- 3x3 determinant by cofactor expansion along row 0 ----- */
+  const steps3x3 = (M, expandRow = 0) => {
+    const n = 3;
+    const row = expandRow;
+    const result = det(M);
+    const steps = [];
+
+    steps.push({
+      title: "Choose a row to expand along",
+      html: `We use <b>cofactor expansion along row ${row + 1}</b>.
+             The sign pattern (checkerboard) starts with + at the top-left:
+             ${texBlock(`\\begin{matrix} + & - & + \\\\ - & + & - \\\\ + & - & + \\end{matrix}`)}
+             Each term is <b>entry × sign × (determinant of the leftover 2×2)</b>.`,
+      viz: { type: "cofactor", M, row, phase: "intro" },
+    });
+
+    const termPieces = [];
+    for (let j = 0; j < n; j++) {
+      const entry = M[row][j];
+      const sgn = (row + j) % 2 === 0 ? 1 : -1;
+      const sub = minor(M, row, j);
+      const subDet = det(sub);
+      const term = sgn * entry * subDet;
+      termPieces.push({ entry, sgn, sub, subDet, term, j });
+
+      steps.push({
+        title: `Term ${j + 1}: cover row ${row + 1}, column ${j + 1}`,
+        html: `Take the entry ${tex(fmt(entry))}. Its position sign is
+               <b>${sgn === 1 ? "+" : "−"}</b>. Delete its row and column — the
+               leftover 2×2 is its <b>minor</b>:
+               ${texBlock(
+                 `${sgn === 1 ? "+" : "-"}\\,(${paren(entry)})\\cdot${latexMatrix(
+                   sub,
+                   "v"
+                 )}`
+               )}`,
+        viz: {
+          type: "cofactor",
+          M,
+          row,
+          phase: "term",
+          col: j,
+          sign: sgn,
+          minor: sub,
+        },
+      });
+    }
+
+    // compute each 2x2 minor
+    steps.push({
+      title: "Evaluate each 2×2 minor",
+      html: termPieces
+        .map(
+          (p) =>
+            `${texBlock(
+              `${latexMatrix(p.sub, "v")} = (${fmt(p.sub[0][0])})(${fmt(
+                p.sub[1][1]
+              )}) - (${fmt(p.sub[0][1])})(${fmt(p.sub[1][0])}) = ${fmt(p.subDet)}`
+            )}`
+        )
+        .join(""),
+      viz: { type: "cofactor", M, row, phase: "intro" },
+    });
+
+    // assemble
+    const assembled = termPieces
+      .map(
+        (p) =>
+          `${p.sgn === 1 ? "+" : "-"}\\,${paren(p.entry)}\\cdot(${fmt(
+            p.subDet
+          )})`
+      )
+      .join(" ");
+    const numeric = termPieces
+      .map((p) => `${p.term < 0 ? "-" : "+"}\\,${fmt(Math.abs(p.term))}`)
+      .join(" ");
+
+    steps.push({
+      title: "Add the three terms",
+      html: texBlock(`\\det(A) = ${assembled}`) +
+            texBlock(`\\det(A) = ${numeric} = \\mathbf{${fmt(result)}}`),
+      viz: { type: "cofactor", M, row, phase: "result", result },
+    });
+
+    return { result, steps };
+  };
+
+  /* ----- triangular determinant ----- */
+  const stepsTriangular = (M) => {
+    const n = M.length;
+    const diag = M.map((row, i) => row[i]);
+    const result = diag.reduce((a, b) => a * b, 1);
+    return {
+      result,
+      steps: [
+        {
+          title: "Spot the triangular shape",
+          html: `Every entry on one side of the main diagonal is 0, so this is a
+                 <b>triangular matrix</b>. For triangular (and diagonal) matrices the
+                 determinant is just the <b>product of the diagonal entries</b> — the
+                 other entries do not matter at all.`,
+          viz: { type: "diagonal", M, phase: "intro" },
+        },
+        {
+          title: "Multiply the diagonal",
+          html: texBlock(
+            `\\det(A) = ${diag.map(paren).join(" \\cdot ")}`
+          ),
+          viz: { type: "diagonal", M, phase: "diag" },
+        },
+        {
+          title: "Result",
+          html: texBlock(`\\det(A) = \\mathbf{${fmt(result)}}`),
+          viz: { type: "diagonal", M, phase: "result", result },
+        },
+      ],
+    };
+  };
+
+  /* ===================================================================
+     RANDOM PROBLEM GENERATORS  (for the practice gauntlet — infinite)
+  =================================================================== */
+  const ri = (lo, hi) => Math.floor(Math.random() * (hi - lo + 1)) + lo;
+  const nz = (lo, hi) => {
+    let v = 0;
+    while (v === 0) v = ri(lo, hi);
+    return v;
+  };
+
+  const gen2x2 = () => {
+    const M = [
+      [nz(-6, 6), ri(-6, 6)],
+      [ri(-6, 6), nz(-6, 6)],
+    ];
+    return { M, answer: det(M), kind: "2x2" };
+  };
+
+  const gen3x3 = () => {
+    // keep one zero in for friendlier arithmetic sometimes
+    const M = [
+      [ri(-4, 4), ri(-4, 4), ri(-4, 4)],
+      [ri(-4, 4), ri(-4, 4), ri(-4, 4)],
+      [ri(-4, 4), ri(-4, 4), ri(-4, 4)],
+    ];
+    return { M, answer: det(M), kind: "3x3" };
+  };
+
+  const genTriangular = (n = 3) => {
+    const M = Array.from({ length: n }, () => Array(n).fill(0));
+    for (let i = 0; i < n; i++)
+      for (let j = 0; j < n; j++) {
+        if (j < i) M[i][j] = ri(-5, 5); // lower triangular fill
+        else if (j === i) M[i][j] = nz(-4, 4);
+      }
+    return { M, answer: det(M), kind: "triangular" };
+  };
+
+  // 4x4 with a sparse row to reward smart expansion
+  const genSparse4 = () => {
+    const M = [
+      [ri(-3, 3), ri(-3, 3), ri(-3, 3), ri(-3, 3)],
+      [0, nz(-3, 3), 0, 0],
+      [ri(-3, 3), ri(-3, 3), ri(-3, 3), ri(-3, 3)],
+      [ri(-3, 3), ri(-3, 3), ri(-3, 3), ri(-3, 3)],
+    ];
+    return { M, answer: det(M), kind: "sparse4" };
+  };
+
+  /* ----- property / algebra question generators (Stage C & D) ----- */
+  // det(kA) = k^n det(A)
+  const genScalarMultiple = () => {
+    const n = ri(2, 3);
+    const d = nz(-6, 6);
+    const k = nz(-3, 3);
+    const answer = Math.pow(k, n) * d;
+    return {
+      kind: "scalar",
+      n,
+      k,
+      d,
+      answer,
+      prompt: `\\(A\\) is an \\(${n}\\times ${n}\\) matrix with \\(\\det(A) = ${d}\\). Find \\(\\det(${k}A)\\).`,
+      reteach: `Scaling <b>every</b> row of an \\(n\\times n\\) matrix by \\(k\\) multiplies the determinant by \\(k\\) once per row — and there are \\(n\\) rows. So \\(\\det(kA)=k^{n}\\det(A)\\), NOT \\(k\\det(A)\\). Here \\(n=${n}\\), \\(k=${k}\\): \\(\\det(${k}A) = (${k})^{${n}}\\cdot(${d}) = ${Math.pow(
+        k,
+        n
+      )}\\cdot(${d}) = ${answer}.\\) Watch the sign: a negative \\(k\\) with odd \\(n\\) stays negative.`,
+    };
+  };
+  // det(AB) = det(A)det(B)
+  const genProduct = () => {
+    const a = nz(-6, 6);
+    const b = nz(-6, 6);
+    return {
+      kind: "product",
+      answer: a * b,
+      prompt: `\\(\\det(A) = ${a}\\) and \\(\\det(B) = ${b}\\). Find \\(\\det(AB)\\).`,
+      reteach: `The determinant of a product is the product of the determinants: \\(\\det(AB)=\\det(A)\\det(B) = (${a})(${b}) = ${
+        a * b
+      }.\\) (Order does not matter for the determinant: \\(\\det(AB)=\\det(BA)\\).)`,
+    };
+  };
+  // det(A^{-1}) = 1/det(A)
+  const genInverse = () => {
+    const choices = [2, -2, 4, -4, 5, -5, 1, -1];
+    const a = choices[ri(0, choices.length - 1)];
+    const ans = 1 / a;
+    return {
+      kind: "inverse",
+      answer: ans,
+      prompt: `\\(\\det(A) = ${a}\\). Find \\(\\det(A^{-1})\\). (Enter a fraction like 1/2 if needed.)`,
+      reteach: `Since \\(\\det(A)\\det(A^{-1}) = \\det(I) = 1\\), we get \\(\\det(A^{-1}) = \\dfrac{1}{\\det(A)} = \\dfrac{1}{${a}}.\\)`,
+    };
+  };
+
+  return {
+    fmt,
+    paren,
+    clone,
+    size,
+    minor,
+    det,
+    latexMatrix,
+    tex,
+    texBlock,
+    steps2x2,
+    steps3x3,
+    stepsTriangular,
+    gen2x2,
+    gen3x3,
+    genTriangular,
+    genSparse4,
+    genScalarMultiple,
+    genProduct,
+    genInverse,
+  };
+})();
+
+//]]>
+</script>
+<script>
+//<![CDATA[
+/* ===================================================================
+   MA123 Study — Linear Algebra Engine Extension
+   Attaches new, exact math to the shared Engine object:
+     • Fraction (exact rational arithmetic)
+     • rrefSteps: Gauss–Jordan with every row operation recorded
+     • generators: span/independence/rank, matrix mult, dot/cross,
+       eigenvalues (2×2 + triangular), transformations, linear systems
+   All answers are computed, so practice + reteach are always correct.
+=================================================================== */
+(function (E) {
+  /* ---------------- Fraction ---------------- */
+  const gcd = (a, b) => {
+    a = Math.abs(a); b = Math.abs(b);
+    while (b) { [a, b] = [b, a % b]; }
+    return a || 1;
+  };
+  class Fr {
+    constructor(n, d = 1) {
+      if (d === 0) d = 1;
+      if (d < 0) { n = -n; d = -d; }
+      const g = gcd(n, d);
+      this.n = n / g; this.d = d / g;
+    }
+    static from(x) { return x instanceof Fr ? x : new Fr(x, 1); }
+    add(o) { o = Fr.from(o); return new Fr(this.n * o.d + o.n * this.d, this.d * o.d); }
+    sub(o) { o = Fr.from(o); return new Fr(this.n * o.d - o.n * this.d, this.d * o.d); }
+    mul(o) { o = Fr.from(o); return new Fr(this.n * o.n, this.d * o.d); }
+    div(o) { o = Fr.from(o); return new Fr(this.n * o.d, this.d * o.n); }
+    neg() { return new Fr(-this.n, this.d); }
+    isZero() { return this.n === 0; }
+    isOne() { return this.n === this.d; }
+    eq(o) { o = Fr.from(o); return this.n === o.n && this.d === o.d; }
+    val() { return this.n / this.d; }
+    tex() { return this.d === 1 ? String(this.n) : (this.n < 0 ? `-\\tfrac{${-this.n}}{${this.d}}` : `\\tfrac{${this.n}}{${this.d}}`); }
+    str() { return this.d === 1 ? String(this.n) : `${this.n}/${this.d}`; }
+  }
+
+  const toFrMat = (M) => M.map((r) => r.map((x) => (x instanceof Fr ? x : new Fr(x, 1))));
+  const frLatex = (M, kind = "b") => {
+    const env = kind === "v" ? "vmatrix" : "bmatrix";
+    return `\\begin{${env}}` +
+      M.map((r) => r.map((x) => (x instanceof Fr ? x.tex() : String(x))).join(" & ")).join(" \\\\ ") +
+      `\\end{${env}}`;
+  };
+  // augmented latex ([A | b]) with a vertical bar before last col(s)
+  const augLatex = (M, splitAt) => {
+    const cols = M[0].length;
+    const spec = Array.from({ length: cols }, (_, i) => "c").join("");
+    const withBar = spec.slice(0, splitAt) + "|" + spec.slice(splitAt);
+    return `\\left[\\begin{array}{${withBar}}` +
+      M.map((r) => r.map((x) => (x instanceof Fr ? x.tex() : String(x))).join(" & ")).join(" \\\\ ") +
+      `\\end{array}\\right]`;
+  };
+
+  /* ---------------- RREF with recorded steps ---------------- */
+  // returns { rank, pivots, R (Fr matrix), steps:[{desc, M(Fr)}] }
+  function rrefSteps(input, opts = {}) {
+    const M = toFrMat(input);
+    const rows = M.length, cols = M[0].length;
+    const splitAt = opts.splitAt; // for augmented display
+    const steps = [];
+    const snap = (desc) => steps.push({ desc, M: M.map((r) => r.map((x) => new Fr(x.n, x.d))) });
+    snap("Start");
+    let pivotRow = 0;
+    const pivots = [];
+    const limitCols = opts.coeffCols != null ? opts.coeffCols : cols;
+    for (let col = 0; col < limitCols && pivotRow < rows; col++) {
+      // find pivot
+      let sel = -1;
+      for (let r = pivotRow; r < rows; r++) if (!M[r][col].isZero()) { sel = r; break; }
+      if (sel === -1) continue;
+      if (sel !== pivotRow) {
+        [M[sel], M[pivotRow]] = [M[pivotRow], M[sel]];
+        snap(`R_{${pivotRow + 1}} \\leftrightarrow R_{${sel + 1}}`);
+      }
+      // scale pivot to 1
+      if (!M[pivotRow][col].isOne()) {
+        const p = M[pivotRow][col];
+        M[pivotRow] = M[pivotRow].map((x) => x.div(p));
+        snap(`\\tfrac{1}{${p.str()}}R_{${pivotRow + 1}} \\to R_{${pivotRow + 1}}`);
+      }
+      // eliminate other rows
+      for (let r = 0; r < rows; r++) {
+        if (r === pivotRow || M[r][col].isZero()) continue;
+        const f = M[r][col];
+        M[r] = M[r].map((x, j) => x.sub(f.mul(M[pivotRow][j])));
+        snap(`R_{${r + 1}} - (${f.str()})R_{${pivotRow + 1}} \\to R_{${r + 1}}`);
+      }
+      pivots.push(col);
+      pivotRow++;
+    }
+    return { rank: pivots.length, pivots, R: M, steps, splitAt };
+  }
+
+  // build stepPlayer steps from an rref run (each shown as a matrix + op)
+  function rrefSolutionSteps(input, opts = {}) {
+    const res = rrefSteps(input, opts);
+    const steps = res.steps.map((s, i) => ({
+      title: i === 0 ? "Write the matrix" : `Row operation`,
+      html: (i === 0
+        ? `Set it up, then reduce with row operations (each one shown):`
+        : `Apply \\(${s.desc}\\):`) +
+        E.texBlock(opts.splitAt != null ? augLatex(s.M, opts.splitAt) : frLatex(s.M)),
+      viz: { type: "none" },
+    }));
+    steps.push({
+      title: "Read off the result",
+      html: `RREF reached. <b>rank = ${res.rank}</b>` +
+        (opts.tail ? `<br>${opts.tail(res)}` : ""),
+      viz: { type: "none" },
+    });
+    return { res, steps };
+  }
+
+  /* ---------------- vector / matrix helpers ---------------- */
+  const ri = (lo, hi) => Math.floor(Math.random() * (hi - lo + 1)) + lo;
+  const nz = (lo, hi) => { let v = 0; while (v === 0) v = ri(lo, hi); return v; };
+  const colLatex = (v) => `\\begin{bmatrix}${v.join(" \\\\ ")}\\end{bmatrix}`;
+  const rowsFromCols = (cols) => {
+    const n = cols[0].length;
+    return Array.from({ length: n }, (_, r) => cols.map((c) => c[r]));
+  };
+  const matMul = (A, B) => {
+    const r = A.length, c = B[0].length, k = B.length;
+    const out = Array.from({ length: r }, () => Array(c).fill(0));
+    for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) { let s = 0; for (let t = 0; t < k; t++) s += A[i][t] * B[t][j]; out[i][j] = s; }
+    return out;
+  };
+  const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+
+  /* ============================================================
+     GENERATORS
+  ============================================================ */
+
+  // Linear independence / rank of k vectors in R^n (columns)
+  function genIndep(n = 3, k = 3, forceDependent = null) {
+    let cols, rank, guard = 0;
+    do {
+      cols = Array.from({ length: k }, () => Array.from({ length: n }, () => ri(-3, 3)));
+      // occasionally force a dependent set by making col3 = col1 + col2
+      if (forceDependent === true || (forceDependent === null && Math.random() < 0.4 && k >= 2)) {
+        cols[k - 1] = cols[0].map((x, i) => x + (cols[1] ? cols[1][i] : 0));
+      }
+      rank = rrefSteps(rowsFromCols(cols)).rank;
+      guard++;
+    } while (guard < 30 && ((forceDependent === true && rank === k) || (forceDependent === false && rank !== k)));
+    const A = rowsFromCols(cols);
+    const independent = rank === k;
+    const sol = rrefSolutionSteps(A, {
+      tail: (r) => independent
+        ? `Since rank \\(= ${r.rank}\\) equals the number of vectors \\(k=${k}\\), the vectors are <b>linearly independent</b>.`
+        : `Since rank \\(= ${r.rank} \\neq ${k}\\) (the number of vectors), the vectors are <b>linearly dependent</b>. Free variables: \\(k-\\text{rank} = ${k - r.rank}\\).`,
+    });
+    return { cols, A, rank, independent, sol };
+  }
+
+  function genIndepProblem() {
+    const k = ri(2, 3), n = ri(k, 4);
+    const g = genIndep(n, k);
+    const vhtml = g.cols.map((c, i) => `\\vec v_{${i + 1}}=${colLatex(c)}`).join(",\\ ");
+    return {
+      type: "mc",
+      source: "§5.2 (Lab 7)",
+      promptHtml: `Are these vectors linearly independent? ${E.texBlock(vhtml)} <span class="mini-note">(Put them as columns, row-reduce, compare rank to the number of vectors.)</span>`,
+      choices: [
+        { html: "Linearly independent", correct: g.independent },
+        { html: "Linearly dependent", correct: !g.independent },
+      ],
+      answer: g.independent ? 0 : 1,
+      solution: { steps: g.sol.steps },
+    };
+  }
+
+  function genRankProblem() {
+    const rows = ri(2, 3), cols = ri(2, 4);
+    const M = Array.from({ length: rows }, () => Array.from({ length: cols }, () => ri(-3, 3)));
+    const sol = rrefSolutionSteps(M, {});
+    return {
+      type: "numeric",
+      source: "§5.2 (Lab 7)",
+      promptHtml: `Find the <b>rank</b> of ${E.texBlock(E.latexMatrix(M, "b"))}`,
+      answer: sol.res.rank,
+      solution: { steps: sol.steps },
+    };
+  }
+
+  // Is w in span(v1..vk)?  augmented [A|w] consistent?
+  function genSpanMembership() {
+    const n = ri(2, 3), k = ri(2, 3);
+    const cols = Array.from({ length: k }, () => Array.from({ length: n }, () => ri(-3, 3)));
+    const inSpan = Math.random() < 0.55;
+    let w;
+    if (inSpan) {
+      const coeffs = Array.from({ length: k }, () => ri(-2, 2));
+      w = cols[0].map((_, r) => cols.reduce((s, c, j) => s + c[r] * coeffs[j], 0));
+    } else {
+      w = Array.from({ length: n }, () => ri(-4, 4));
+    }
+    const aug = rowsFromCols(cols).map((r, i) => [...r, w[i]]);
+    const res = rrefSteps(aug, { coeffCols: k, splitAt: k });
+    // consistent iff no row [0..0 | nonzero]
+    let consistent = true;
+    for (const r of res.R) {
+      const lhsZero = r.slice(0, k).every((x) => x.isZero());
+      if (lhsZero && !r[k].isZero()) consistent = false;
+    }
+    const sol = rrefSolutionSteps(aug, {
+      coeffCols: k, splitAt: k,
+      tail: () => consistent
+        ? `No row says \\(0 = \\text{nonzero}\\), so the system is <b>consistent</b> — \\(\\vec w\\) <b>is</b> in the span.`
+        : `A row reads \\(0 = \\text{nonzero}\\), so the system is <b>inconsistent</b> — \\(\\vec w\\) is <b>not</b> in the span.`,
+    });
+    const vhtml = cols.map((c, i) => `\\vec v_{${i + 1}}=${colLatex(c)}`).join(",\\ ") + `,\\ \\vec w=${colLatex(w)}`;
+    return {
+      type: "mc",
+      source: "§5.2 (Lab 7)",
+      promptHtml: `Is \\(\\vec w\\) in \\(\\text{Span}(\\vec v_1,\\dots)\\)? ${E.texBlock(vhtml)}`,
+      choices: [
+        { html: "Yes — \\(\\vec w\\) is in the span", correct: consistent },
+        { html: "No — \\(\\vec w\\) is not in the span", correct: !consistent },
+      ],
+      answer: consistent ? 0 : 1,
+      solution: { steps: sol.steps },
+    };
+  }
+
+  // Matrix multiplication — ask a specific entry
+  function genMatMulEntry() {
+    const m = ri(2, 3), n = ri(2, 3), p = ri(2, 3);
+    const A = Array.from({ length: m }, () => Array.from({ length: n }, () => ri(-4, 4)));
+    const B = Array.from({ length: n }, () => Array.from({ length: p }, () => ri(-4, 4)));
+    const C = matMul(A, B);
+    const i = ri(0, m - 1), j = ri(0, p - 1);
+    const rowA = A[i], colB = B.map((r) => r[j]);
+    const terms = rowA.map((x, t) => `(${x})(${colB[t]})`).join(" + ");
+    return {
+      type: "numeric",
+      source: "§3 Matrix algebra",
+      promptHtml: `For ${E.texBlock(`A=${E.latexMatrix(A, "b")},\\quad B=${E.latexMatrix(B, "b")}`)}
+        find the entry \\((AB)_{${i + 1}${j + 1}}\\).`,
+      answer: C[i][j],
+      solution: { steps: [
+        { title: "Row × column rule", html: `The \\((${i + 1},${j + 1})\\) entry is <b>row ${i + 1} of \\(A\\)</b> dotted with <b>column ${j + 1} of \\(B\\)</b>.`, viz: { type: "none" } },
+        { title: "Multiply and add", html: E.texBlock(`(AB)_{${i + 1}${j + 1}} = ${terms} = ${C[i][j]}`), viz: { type: "none" } },
+      ] },
+    };
+  }
+
+  function genDot() {
+    const n = ri(2, 3);
+    const a = Array.from({ length: n }, () => ri(-5, 5));
+    const b = Array.from({ length: n }, () => ri(-5, 5));
+    const terms = a.map((x, i) => `(${x})(${b[i]})`).join(" + ");
+    return {
+      type: "numeric",
+      source: "§2 Vector geometry",
+      promptHtml: `Compute \\(\\vec a\\cdot\\vec b\\) for \\(\\vec a=${colLatex(a)},\\ \\vec b=${colLatex(b)}\\).`,
+      answer: dot(a, b),
+      solution: { steps: [
+        { title: "Dot product", html: E.texBlock(`\\vec a\\cdot\\vec b = ${terms} = ${dot(a, b)}`), viz: { type: "none" } },
+        { title: "Meaning", html: `If \\(\\vec a\\cdot\\vec b = 0\\) the vectors are <b>perpendicular</b>. Sign tells you the angle is acute (+) or obtuse (−).`, viz: { type: "none" } },
+      ] },
+    };
+  }
+
+  function genCrossComponent() {
+    const a = Array.from({ length: 3 }, () => ri(-4, 4));
+    const b = Array.from({ length: 3 }, () => ri(-4, 4));
+    const c = cross(a, b);
+    const idx = ri(0, 2);
+    const labels = ["first (i)", "second (j)", "third (k)"];
+    const formulas = [
+      `a_2 b_3 - a_3 b_2 = (${a[1]})(${b[2]}) - (${a[2]})(${b[1]})`,
+      `a_3 b_1 - a_1 b_3 = (${a[2]})(${b[0]}) - (${a[0]})(${b[2]})`,
+      `a_1 b_2 - a_2 b_1 = (${a[0]})(${b[1]}) - (${a[1]})(${b[0]})`,
+    ];
+    return {
+      type: "numeric",
+      source: "§2 Vector geometry",
+      promptHtml: `For \\(\\vec a=${colLatex(a)},\\ \\vec b=${colLatex(b)}\\), find the <b>${labels[idx]}</b> component of \\(\\vec a\\times\\vec b\\).`,
+      answer: c[idx],
+      solution: { steps: [
+        { title: "Cross product component", html: `Watch the middle component's sign — it is \\(a_3b_1 - a_1b_3\\) (note the flip).`, viz: { type: "none" } },
+        { title: "Compute", html: E.texBlock(`${formulas[idx]} = ${c[idx]}`), viz: { type: "none" } },
+      ] },
+    };
+  }
+
+  // 2x2 eigenvalues (integer)
+  function genEigen2x2() {
+    let A, tr, det, disc, s, l1, l2, guard = 0;
+    do {
+      A = [[ri(-4, 4), ri(-4, 4)], [ri(-4, 4), ri(-4, 4)]];
+      tr = A[0][0] + A[1][1]; det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+      disc = tr * tr - 4 * det; s = Math.round(Math.sqrt(disc));
+      guard++;
+    } while (guard < 200 && (disc < 0 || s * s !== disc || (tr + s) % 2 !== 0 || tr * tr - 4 * det === 0));
+    l1 = (tr + s) / 2; l2 = (tr - s) / 2;
+    const larger = Math.max(l1, l2);
+    return {
+      type: "numeric",
+      source: "§7 Eigenvalues",
+      promptHtml: `Find the <b>largest eigenvalue</b> of ${E.texBlock(E.latexMatrix(A, "b"))}`,
+      answer: larger,
+      solution: { steps: [
+        { title: "Characteristic polynomial", html: `Eigenvalues solve \\(\\det(A-\\lambda I)=0\\), i.e. \\(\\lambda^2 - (\\text{tr})\\lambda + \\det = 0\\).`, viz: { type: "none" } },
+        { title: "Plug in trace and determinant", html: E.texBlock(`\\lambda^2 - (${tr})\\lambda + (${det}) = 0`), viz: { type: "none" } },
+        { title: "Solve", html: E.texBlock(`\\lambda = \\frac{${tr} \\pm \\sqrt{${disc}}}{2} = ${l1},\\ ${l2}`) + `<p>Largest eigenvalue: <b>${larger}</b>.</p>`, viz: { type: "none" } },
+      ] },
+    };
+  }
+
+  // triangular 3x3 eigenvalues (diagonal) + diagonalizability of distinct
+  function genEigenTriangular3() {
+    const d = [nz(-4, 4), nz(-4, 4), nz(-4, 4)];
+    const M = [[d[0], ri(-3, 3), ri(-3, 3)], [0, d[1], ri(-3, 3)], [0, 0, d[2]]];
+    const larger = Math.max(...d);
+    return {
+      type: "numeric",
+      source: "§7 Eigenvalues",
+      promptHtml: `This matrix is triangular. Find its <b>largest eigenvalue</b>. ${E.texBlock(E.latexMatrix(M, "b"))}`,
+      answer: larger,
+      solution: { steps: [
+        { title: "Triangular shortcut", html: `For a triangular matrix, the eigenvalues are exactly the <b>diagonal entries</b>: \\(${d.join(",\\ ")}\\).`, viz: { type: "diagonal", M, phase: "diag" } },
+        { title: "Largest", html: `The largest is <b>${larger}</b>.`, viz: { type: "none" } },
+      ] },
+    };
+  }
+
+  // transformation image: apply standard matrix to a vector
+  function genTransformImage() {
+    const A = [[ri(-3, 3), ri(-3, 3)], [ri(-3, 3), ri(-3, 3)]];
+    const x = [ri(-4, 4), ri(-4, 4)];
+    const y = [A[0][0] * x[0] + A[0][1] * x[1], A[1][0] * x[0] + A[1][1] * x[1]];
+    const comp = ri(0, 1);
+    return {
+      type: "numeric",
+      source: "§ Matrix transformations",
+      promptHtml: `The transformation \\(T(\\vec x)=A\\vec x\\) has \\(A=${E.latexMatrix(A, "b")}\\). Find the <b>${comp === 0 ? "first" : "second"}</b> component of the image of \\(\\vec x=${colLatex(x)}\\).`,
+      answer: y[comp],
+      solution: { steps: [
+        { title: "Apply the matrix", html: E.texBlock(`A\\vec x = ${E.latexMatrix(A, "b")}${colLatex(x)} = \\begin{bmatrix}(${A[0][0]})(${x[0]})+(${A[0][1]})(${x[1]})\\\\(${A[1][0]})(${x[0]})+(${A[1][1]})(${x[1]})\\end{bmatrix} = ${colLatex(y)}`), viz: { type: "none" } },
+      ] },
+    };
+  }
+
+  // identify a geometric transformation from its matrix (mc)
+  const GEO = [
+    { A: [[1, 0], [0, -1]], name: "Reflection over the x-axis" },
+    { A: [[-1, 0], [0, 1]], name: "Reflection over the y-axis" },
+    { A: [[0, 1], [1, 0]], name: "Reflection over the line y = x" },
+    { A: [[0, -1], [1, 0]], name: "90° counter-clockwise rotation" },
+    { A: [[3, 0], [0, 1]], name: "Horizontal stretch (factor 3)" },
+    { A: [[1, 0], [0, 3]], name: "Vertical stretch (factor 3)" },
+    { A: [[1, 2], [0, 1]], name: "Horizontal shear (s = 2)" },
+    { A: [[2, 0], [0, 2]], name: "Scaling / dilation (factor 2)" },
+  ];
+  function genGeoTransform() {
+    const pick = GEO[ri(0, GEO.length - 1)];
+    const distract = [...GEO].filter((g) => g.name !== pick.name).sort(() => Math.random() - 0.5).slice(0, 3);
+    const opts = [pick, ...distract].sort(() => Math.random() - 0.5);
+    return {
+      type: "mc",
+      source: "§ Matrix transformations",
+      promptHtml: `Which geometric transformation has standard matrix ${E.texBlock(E.latexMatrix(pick.A, "b"))}?`,
+      choices: opts.map((o) => ({ html: o.name, correct: o.name === pick.name })),
+      answer: opts.findIndex((o) => o.name === pick.name),
+      reteachHtml: `This is <b>${pick.name}</b>. Learn the eight standard 2×2 matrices (rotation, horizontal/vertical stretch, scaling, horizontal/vertical shear, reflections over x-axis, y-axis, and y=x).`,
+    };
+  }
+
+  // small linear system, unique integer solution — ask x1
+  function genSystemSolve() {
+    let A, sol, b, det, guard = 0;
+    const n = ri(2, 3);
+    do {
+      A = Array.from({ length: n }, () => Array.from({ length: n }, () => ri(-3, 3)));
+      sol = Array.from({ length: n }, () => ri(-4, 4));
+      b = A.map((row) => row.reduce((s, a, j) => s + a * sol[j], 0));
+      det = E.det(A);
+      guard++;
+    } while (guard < 60 && det === 0);
+    const aug = A.map((r, i) => [...r, b[i]]);
+    const s = rrefSolutionSteps(aug, {
+      coeffCols: n, splitAt: n,
+      tail: () => `Read the solution straight from the identity block: \\(x_1 = ${sol[0]}\\).`,
+    });
+    return {
+      type: "numeric",
+      source: "§1 Linear systems",
+      promptHtml: `Solve the system (find \\(x_1\\)) by row-reducing the augmented matrix: ${E.texBlock(E.augHelper ? "" : "")}${E.texBlock(augLatex(aug.map((r) => r.map((x) => new Fr(x))), n))}`,
+      answer: sol[0],
+      solution: { steps: s.steps },
+    };
+  }
+
+  /* expose */
+  Object.assign(E, {
+    Fr, rrefSteps, rrefSolutionSteps, frLatex, augLatex, colLatex, rowsFromCols, matMul, dot, cross,
+    genIndep, genIndepProblem, genRankProblem, genSpanMembership, genMatMulEntry,
+    genDot, genCrossComponent, genEigen2x2, genEigenTriangular3, genTransformImage,
+    genGeoTransform, genSystemSolve,
+  });
+})(Engine);
+
+//]]>
+</script>
+<script>
+//<![CDATA[
+/* ===================================================================
+   Content helpers — small builders shared by every study module.
+   Included in every bundle so content files stay short and readable.
+=================================================================== */
+const H = (() => {
+  const E = Engine;
+  // concept card
+  const card = (html, viz) => ({ html, viz: viz || { type: "none" } });
+  // guided problem
+  const gp = (source, title, promptHtml, matrix, build) => ({ source, title, promptHtml, matrix, build });
+  // a practice slot
+  const slot = (label, source, generate) => ({ label, source, generate });
+
+  // True/False bank -> generator that serves a random one
+  const tfBank = (source, list) => () => {
+    const q = list[Math.floor(Math.random() * list.length)];
+    return { type: "tf", source, promptHtml: q.s, answer: q.a, reteachHtml: q.why };
+  };
+  // Multiple-choice bank
+  const mcBank = (source, list) => () => {
+    const q = list[Math.floor(Math.random() * list.length)];
+    // shuffle choices, track correct
+    const idxs = q.choices.map((_, i) => i).sort(() => Math.random() - 0.5);
+    const choices = idxs.map((i) => q.choices[i]);
+    const answer = choices.findIndex((c) => c.correct);
+    return { type: "mc", source, promptHtml: q.prompt, choices, answer, reteachHtml: q.why };
+  };
+  // fixed numeric bank (curated problems with worked steps)
+  const numBank = (source, list) => () => {
+    const q = list[Math.floor(Math.random() * list.length)];
+    return { type: "numeric", source, promptHtml: q.prompt, matrix: q.matrix || null, answer: q.answer, solution: q.solution, reteachHtml: q.why };
+  };
+  // step helpers
+  const step = (title, html, viz) => ({ title, html, viz: viz || { type: "none" } });
+  const tex = E.texBlock;
+  const M = (m, kind) => E.latexMatrix(m, kind || "b");
+
+  // reusable determinant practice problems (with worked solutions)
+  const det3 = () => { const g = E.gen3x3(); return { type: "numeric", source: "§4 Determinants", promptHtml: "Compute the determinant:", matrix: g.M, answer: g.answer, solution: { steps: E.steps3x3(g.M).steps } }; };
+  const det2 = () => { const g = E.gen2x2(); return { type: "numeric", source: "§4 Determinants", promptHtml: "Compute the determinant:", matrix: g.M, answer: g.answer, solution: { steps: E.steps2x2(g.M).steps } }; };
+  const detTri = () => { const g = E.genTriangular(4); return { type: "numeric", source: "§4 Determinants", promptHtml: "Compute the determinant (triangular):", matrix: g.M, answer: g.answer, solution: { steps: E.stepsTriangular(g.M).steps } }; };
+
+  return { card, gp, slot, tfBank, mcBank, numBank, step, tex, M, E, det3, det2, detTri };
+})();
+
+//]]>
+</script>
+<script>
+//<![CDATA[
+/* ===================================================================
+   LAB 7 PREP — §5.2 Linear Combinations, Span, Linear Independence, Rank
+   Confirmed scope: 123notes7S26.pdf (current lab notes) + Fall-2025 Lab 7
+   solutions. RREF is the engine of this whole lab, so Stage A rebuilds it
+   from scratch (your flagged weak spot).
+=================================================================== */
+const E = Engine, { card, gp, slot, tfBank, mcBank, numBank, step, tex, M } = H;
+
+const CURRICULUM = {
+  meta: {
+    course: "MA123 · Lab 7 Prep",
+    lab: "Lab 7 — Span, Independence & Rank (§5.2)",
+    book: "Introductory Linear Algebra, Hu et al. — §5.2",
+    lede: "Everything in Lab 7 runs on <b>RREF</b>. We rebuild your row-reduction from scratch, then use it for linear combinations, span, independence, and rank — exactly the Fall-2025 Lab 7 question types.",
+    pills: ["⏱ ≈ 70 min", "🧮 RREF refresher included", "🎯 4 stages + boss", "📄 Source: 123notes7S26"],
+    sourceNote: "Source files: <b>123notes7S26.pdf</b> (lab notes) · <b>ma123-lab-report-7-solutions-fall-2025.pdf</b> · textbook §5.2 exercises.",
+    startLabel: "Start Stage A — RREF ›",
+    doneTitle: "Lab 7 locked 🎓",
+    doneText: "You can row-reduce cleanly, test span membership, and decide independence by rank. That's the whole lab.",
+  },
+
+  stages: [
+    /* ---------------- Stage A: RREF refresher ---------------- */
+    {
+      id: "A", name: "RREF Refresher", tagline: "Row-reduce anything, cleanly, every time", estMin: 20,
+      sources: ["§1 / §5.2"],
+      concept: { title: "Reduced Row Echelon Form, rebuilt", cards: [
+        card(`Everything in Lab 7 is decided by <b>row reduction</b>. Reduced Row Echelon Form (RREF) is the “fully simplified” version of a matrix. Three things define it: each nonzero row starts with a <b>leading 1</b> (a pivot); each pivot is the <b>only</b> nonzero entry in its column; and pivots move <b>right as you go down</b> (a staircase). Zero rows sink to the bottom.`),
+        card(`You reach it with exactly <b>three legal row operations</b>: swap two rows, multiply a row by a nonzero number, or add a multiple of one row to another. That last one is your workhorse — it makes zeros without side effects.`,
+          { type: "rowop", before: [[2, 4, 2], [1, 3, 1], [0, 1, 5]], after: [[1, 2, 1], [1, 3, 1], [0, 1, 5]], op: "\\tfrac12 R_1 \\to R_1", effect: "scale" }),
+        card(`Two numbers fall out of the RREF and power the rest of the lab: the <b>rank</b> = the number of leading 1s (pivots), and the number of <b>free variables</b> = (number of columns) − rank. Memorize that second one — it tells you how many solutions a system has.`),
+        card(`Strategy that never fails: get a 1 in the top-left, clear the rest of column 1 to zeros, move down-right to the next pivot, repeat. Then go back <b>up</b> to clear above each pivot. Slow is smooth; smooth is fast.`),
+      ]},
+      guided: { intro: "Watch every single row operation — no skipped steps.", problems: [
+        gp("§5.2 lab notes", "Row-reduce a 2×3 augmented matrix", "This is the exact linear-combination system from your lab notes. We reduce \\([\\,\\vec v_1\\ \\vec v_2\\mid\\vec w\\,]\\).", [[15, 4, -3], [6, 3, -4]],
+          () => E.rrefSolutionSteps([[15, 4, -3], [6, 3, -4]], { coeffCols: 2, splitAt: 2, tail: () => "So \\(t_1=\\tfrac13,\\ t_2=-2\\) — read straight off the identity block." })),
+        gp("Predicted", "Row-reduce a 3×3 to the identity", "A full 3×3 reduction. Notice how clearing below, then above, each pivot works.", [[1, 2, -1], [2, 1, 1], [1, -1, 2]],
+          () => E.rrefSolutionSteps([[1, 2, -1], [2, 1, 1], [1, -1, 2]], {})),
+      ]},
+      practice: { intro: "No AI, no internet — reduce by hand. Report the rank.", slots: [
+        slot("Rank by RREF", "Predicted Lab Q", E.genRankProblem),
+        slot("Rank by RREF", "Predicted Lab Q", E.genRankProblem),
+        slot("Solve a system (find x₁)", "§1 systems", E.genSystemSolve),
+      ]},
+    },
+
+    /* ---------------- Stage B: linear combinations & span ---------------- */
+    {
+      id: "B", name: "Combinations & Span", tagline: "Is w reachable from these vectors?", estMin: 18,
+      sources: ["§5.2"],
+      concept: { title: "Linear combinations and span", cards: [
+        card(`A <b>linear combination</b> of \\(\\vec v_1,\\dots,\\vec v_k\\) is any \\(t_1\\vec v_1+\\dots+t_k\\vec v_k\\). To find the coefficients \\(t_i\\), you solve the system whose augmented matrix is \\([\\,\\vec v_1\\ \\vec v_2\\ \\cdots\\ \\vec v_k\\mid\\vec w\\,]\\) — the vectors are the columns, \\(\\vec w\\) is the right side.`),
+        card(`The <b>span</b> of a set is <b>all</b> of its linear combinations. So “Is \\(\\vec w\\in\\text{Span}(S)\\)?” is the same question as “Is the system \\([\\,\\text{vectors}\\mid\\vec w\\,]\\) <b>consistent</b>?” Row-reduce and look for a contradiction row \\([\\,0\\ 0\\ \\cdots\\ 0\\mid c\\,]\\) with \\(c\\neq 0\\).`),
+        card(`If reduction gives a contradiction row → <b>inconsistent</b> → \\(\\vec w\\) is <b>not</b> in the span. If no contradiction → <b>consistent</b> → \\(\\vec w\\) <b>is</b> in the span, and the RREF hands you the coefficients.`),
+        card(`Handy fact (notes 2c): a vector that is already a combination of the others is “redundant” — dropping it doesn't change the span. That's the bridge to independence in Stage C.`),
+      ]},
+      guided: { intro: "Two worked span questions.", problems: [
+        gp("§5.2 lab notes", "Write w as a combination", "Reduce \\([\\,\\vec v_1\\ \\vec v_2\\mid\\vec w\\,]\\) with \\(\\vec v_1=(15,6),\\ \\vec v_2=(4,3),\\ \\vec w=(-3,-4)\\).", [[15, 4, -3], [6, 3, -4]],
+          () => E.rrefSolutionSteps([[15, 4, -3], [6, 3, -4]], { coeffCols: 2, splitAt: 2, tail: () => "Consistent ⇒ \\(\\vec w=\\tfrac13\\vec v_1-2\\vec v_2\\in\\text{Span}(\\vec v_1,\\vec v_2)\\)." })),
+        gp("§5.2 style", "Is w in the span? (R³)", "Test whether \\(\\vec w=(1,2,3)\\) is a combination of \\((1,0,1),(0,1,1)\\).", [[1, 0, 1], [0, 1, 2], [1, 1, 3]],
+          () => E.rrefSolutionSteps([[1, 0, 1], [0, 1, 2], [1, 1, 3]], { coeffCols: 2, splitAt: 2, tail: () => "Bottom row becomes \\([\\,0\\ 0\\mid 0\\,]\\) — no contradiction, so \\(\\vec w\\) IS in the span (here \\(\\vec w=\\vec v_1+2\\vec v_2\\))." })),
+      ]},
+      practice: { intro: "No AI, no internet. Reduce the augmented matrix in your head/paper.", slots: [
+        slot("Is w in the span?", "§5.2", E.genSpanMembership),
+        slot("Is w in the span?", "§5.2", E.genSpanMembership),
+        slot("Rank check", "§5.2", E.genRankProblem),
+      ]},
+    },
+
+    /* ---------------- Stage C: independence & rank ---------------- */
+    {
+      id: "C", name: "Independence & Rank", tagline: "rank = k means independent", estMin: 18,
+      sources: ["§5.2"],
+      concept: { title: "Linear independence via rank", cards: [
+        card(`Vectors are <b>linearly independent</b> when the <b>only</b> way to get \\(t_1\\vec v_1+\\dots+t_k\\vec v_k=\\vec 0\\) is the trivial one \\(t_1=\\dots=t_k=0\\). If any other solution exists, they're <b>dependent</b> — one vector is a combination of the others.`),
+        card(`The fast test (notes 3a): put the vectors as columns of \\(A\\). Then they are independent <b>iff</b> \\(\\text{rank}(A)=k\\), the number of vectors. Rank short of \\(k\\) ⇒ dependent.`),
+        card(`Number of free variables in \\(A\\vec t=\\vec 0\\) is \\(m=k-\\text{rank}(A)\\). Independent means \\(m=0\\) (only the trivial solution). Each free variable is a genuinely different dependency.`),
+        card(`Two shortcuts the lab loves: (1) more vectors than the dimension (\\(k>n\\)) ⇒ automatically <b>dependent</b>. (2) A set containing the zero vector is always <b>dependent</b>. (3) If \\(A\\) is square, independent \\(\\iff \\det(A)\\neq 0\\) — ties back to Lab 6.`),
+      ]},
+      guided: { intro: "Two worked independence problems.", problems: [
+        gp("Fall-2025 Lab 7", "Are three R⁴ vectors independent?", "Columns \\(\\vec v_1=(0,2,-2,3),\\vec v_2=(1,-1,2,4),\\vec v_3=(3,2,-1,0)\\). Reduce and compare rank to \\(k=3\\).", [[0, 1, 3], [2, -1, 2], [-2, 2, -1], [3, 4, 0]],
+          () => E.rrefSolutionSteps([[0, 1, 3], [2, -1, 2], [-2, 2, -1], [3, 4, 0]], { tail: () => "rank \\(=3=k\\) ⇒ <b>independent</b> (matches the Fall-2025 solution)." })),
+        gp("§5.2 lab notes", "A dependent set (rank < k)", "Columns \\((15,6),(4,3),(-3,-4)\\) — three vectors in \\(\\mathbb R^2\\).", [[15, 4, -3], [6, 3, -4]],
+          () => E.rrefSolutionSteps([[15, 4, -3], [6, 3, -4]], { tail: () => "rank \\(=2\\neq 3=k\\) ⇒ <b>dependent</b>. Free variables \\(=3-2=1\\). (Also obvious: 3 vectors in \\(\\mathbb R^2\\) must be dependent.)" })),
+      ]},
+      practice: { intro: "No AI, no internet.", slots: [
+        slot("Independent or dependent?", "§5.2", E.genIndepProblem),
+        slot("Independent or dependent?", "§5.2", E.genIndepProblem),
+        slot("Find the rank", "§5.2", E.genRankProblem),
+      ]},
+    },
+
+    /* ---------------- Stage D: theory traps + applications ---------------- */
+    {
+      id: "D", name: "Traps & Applications", tagline: "True/False edges + the RGB / encoding lab style", estMin: 14,
+      sources: ["§5.2 exercises", "Lab 7 applications"],
+      concept: { title: "The conceptual edges Lab 7 tests", cards: [
+        card(`Lab 7 mixes computation with True/False traps straight from §5.2. The classic ones: “a dependent set must contain \\(\\vec 0\\)” (false), “\\(k<n\\) vectors can span \\(\\mathbb R^n\\)” (false — you need at least \\(n\\)), and “removing a vector from an independent set keeps it independent” (true).`),
+        card(`Application flavour (Fall-2025 Q2): colours as vectors \\((r,g,b)\\). A new colour is a linear combination \\(\\vec a=c_1\\vec m+c_2\\vec n+c_3\\vec p\\). If the palette is <b>dependent</b>, you can reproduce the same colour with fewer base colours — that's the RREF giving \\(\\vec p=0.5\\vec m+0.1\\vec n\\).`),
+        card(`Application flavour (Fall-2024 Q3): encoding a message. Determinant \\(\\neq 0\\) ⇒ the encoding matrix is invertible ⇒ columns independent ⇒ the message can be uniquely decoded. Independence = uniqueness = invertibility. Same idea, three vocabularies.`),
+      ]},
+      guided: { intro: "One application walkthrough, then straight to the trap gauntlet.", problems: [
+        gp("Fall-2025 Lab 7 Q2", "Colour palette dependency", "Palette matrix \\(C=[\\vec m\\ \\vec n\\ \\vec p]\\) reduces to an RREF with a zero row. What does that mean?", null,
+          () => ({ steps: [
+            step("Set up", "The three colours are columns of \\(C\\). We row-reduce \\(C\\).", { type: "none" }),
+            step("RREF has a zero row", tex(`C \\xrightarrow{\\text{RREF}} \\begin{bmatrix}1&0&0.5\\\\0&1&0.1\\\\0&0&0\\end{bmatrix}`) + "A zero row ⇒ rank \\(=2<3\\) ⇒ the colours are <b>dependent</b>.", { type: "none" }),
+            step("Read the dependency", "The third column \\((0.5,0.1)\\) says \\(\\vec p=0.5\\vec m+0.1\\vec n\\). So any mix using \\(\\vec p\\) can be rewritten using only \\(\\vec m,\\vec n\\).", { type: "none" }),
+          ] })),
+      ]},
+      practice: { intro: "No AI, no internet. Commit to True/False before revealing.", slots: [
+        slot("True / False (§5.2)", "§5.2 exercises", tfBank("§5.2 exercises", [
+          { s: "Every linearly dependent set of vectors in \\(\\mathbb R^n\\) contains the zero vector.", a: false, why: "False. e.g. \\(\\{(1,0),(2,0)\\}\\) is dependent but has no zero vector. Dependence means one vector is a combination of others, not that \\(\\vec 0\\) is present." },
+          { s: "There is a set of eleven vectors that spans \\(\\mathbb R^{17}\\).", a: false, why: "False. Spanning \\(\\mathbb R^{17}\\) needs at least 17 vectors; 11 can span at most an 11-dimensional subspace." },
+          { s: "The set \\(\\{\\vec 0,(1,0,1),(2,1,-1)\\}\\) in \\(\\mathbb R^3\\) is linearly dependent.", a: true, why: "True. Any set containing the zero vector is dependent (take coefficient 1 on \\(\\vec 0\\), 0 on the rest)." },
+          { s: "If \\(\\vec u,\\vec v\\) are independent in \\(\\mathbb R^3\\) and \\(\\vec w\\neq\\vec 0\\) is not in their plane, then \\(\\{\\vec u,\\vec v,\\vec w\\}\\) is independent.", a: true, why: "True. \\(\\vec w\\) not in \\(\\text{Span}(\\vec u,\\vec v)\\) means it adds a new direction, so no nontrivial combination gives \\(\\vec 0\\)." },
+          { s: "If the columns of a square matrix \\(A\\) are linearly dependent, then \\(\\det(A)=0\\).", a: true, why: "True. Dependent columns ⇒ rank \\(<n\\) ⇒ not invertible ⇒ \\(\\det(A)=0\\) (Lab 6 link)." },
+          { s: "Any 4 vectors in \\(\\mathbb R^3\\) are linearly dependent.", a: true, why: "True. More vectors than the dimension (\\(k>n\\)) forces dependence — rank is capped at \\(n=3\\)." },
+        ])),
+        slot("True / False (§5.2)", "§5.2 exercises", tfBank("§5.2 exercises", [
+          { s: "Removing a vector from a linearly independent set leaves it independent.", a: true, why: "True (Fall-2025 Q1d). A subset of an independent set is still independent." },
+          { s: "If \\(\\text{rank}(A)=k\\) where \\(A\\) has \\(k\\) columns, the columns are independent.", a: true, why: "True — this is the rank test for independence." },
+          { s: "3 vectors in \\(\\mathbb R^3\\) always span \\(\\mathbb R^3\\).", a: false, why: "False. Only if they're independent (rank 3). Three coplanar vectors span just a plane." },
+        ])),
+        slot("Independent or dependent?", "§5.2", E.genIndepProblem),
+      ]},
+    },
+  ],
+
+  interleave: {
+    afterB: { title: "Interleave · RREF still sharp?", blurb: "You just used RREF for span. Prove the raw reduction still fires.", slots: [
+      slot("Rank by RREF", "Stage A review", E.genRankProblem),
+      slot("Solve a system", "Stage A review", E.genSystemSolve),
+    ]},
+    afterC: { title: "Interleave · Span + Independence mixed", blurb: "Two questions, two different skills, back to back.", slots: [
+      slot("Is w in the span?", "Stage B review", E.genSpanMembership),
+      slot("Independent?", "Stage C review", E.genIndepProblem),
+    ]},
+  },
+
+  mock: {
+    title: "Boss Gauntlet · Predicted Lab 7", blurb: "A shuffled mix in the exact Fall-2025 Lab 7 style. No AI, no internet.",
+    slots: [
+      slot("Q · rank", "Predicted Lab Q", E.genRankProblem),
+      slot("Q · independence", "Predicted Lab Q", E.genIndepProblem),
+      slot("Q · span membership", "Predicted Lab Q", E.genSpanMembership),
+      slot("Q · solve a system", "Predicted Lab Q", E.genSystemSolve),
+      slot("Q · §5.2 True/False", "Predicted Lab Q", tfBank("§5.2", [
+        { s: "A set containing \\(\\vec 0\\) is always linearly dependent.", a: true, why: "True — coefficient 1 on \\(\\vec 0\\) gives a nontrivial combination equal to \\(\\vec 0\\)." },
+        { s: "5 vectors in \\(\\mathbb R^4\\) can be linearly independent.", a: false, why: "False. \\(k=5>4=n\\) forces dependence." },
+        { s: "If \\(\\text{rank}(A)<k\\) (k columns), the columns are dependent.", a: true, why: "True — rank test: short of \\(k\\) means a nontrivial null-space vector exists." },
+      ])),
+      slot("Q · independence", "Predicted Lab Q", E.genIndepProblem),
+    ],
+  },
+};
+
+//]]>
+</script>
+<script>
+//<![CDATA[
+/* ===================================================================
+   MA123 Lab 6 — Determinants  ::  APP (UI engine)
+   Ties the curriculum + engine to the screen:
+     • recommended path + free navigation
+     • one-step-at-a-time step player
+     • interactive matrix visualizations
+     • the locked practice "gauntlet"
+     • the wrong-answer tracker (persisted)
+=================================================================== */
+
+(() => {
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const el = (tag, cls, html) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+
+  /* ---------- MathJax typesetting helper ----------
+     MathJax v3 breaks (NaN-size SVGs) if typesetPromise calls overlap.
+     We serialize every request through a single promise chain. */
+  let mjQueue = Promise.resolve();
+  function typeset(node) {
+    if (!(window.MathJax && MathJax.typesetPromise)) return mjQueue;
+    mjQueue = mjQueue
+      .then(() => {
+        if (node && MathJax.typesetClear) {
+          try {
+            MathJax.typesetClear([node]);
+          } catch {}
+        }
+        return MathJax.typesetPromise(node ? [node] : undefined);
+      })
+      .catch(() => {});
+    return mjQueue;
+  }
+
+  /* ---------- persistent state ---------- */
+  const LS_KEY = "ma123_" + String((CURRICULUM.meta && (CURRICULUM.meta.id || CURRICULUM.meta.lab || CURRICULUM.meta.title)) || "guide").replace(/\W+/g, "_").slice(0, 48) + "_v1";
+  const state = loadState();
+  function loadState() {
+    try {
+      return (
+        JSON.parse(localStorage.getItem(LS_KEY)) || {
+          completed: {},
+          wrongLog: [],
+        }
+      );
+    } catch {
+      return { completed: {}, wrongLog: [] };
+    }
+  }
+  function saveState() {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    } catch {}
+  }
+
+  /* ---------- build the recommended path ---------- */
+  const path = buildPath();
+  let current = 0;
+
+  function buildPath() {
+    const nodes = [{ type: "intro", id: "intro", label: "Start here" }];
+    (CURRICULUM.stages || []).forEach((st) => {
+      nodes.push({ type: "concept", id: `${st.id}-concept`, stage: st, label: `Learn` });
+      nodes.push({ type: "guided", id: `${st.id}-guided`, stage: st, label: `Guided` });
+      nodes.push({ type: "practice", id: `${st.id}-practice`, stage: st, label: `Practice` });
+      const inter = (CURRICULUM.interleave || {})[`after${st.id}`];
+      if (inter)
+        nodes.push({
+          type: "interleave",
+          id: `${st.id}-interleave`,
+          data: inter,
+          label: "Review",
+        });
+    });
+    if (CURRICULUM.exam)
+      nodes.push({ type: "exam", id: "exam", data: CURRICULUM.exam, label: "Exam" });
+    if (CURRICULUM.mock)
+      nodes.push({ type: "mock", id: "mock", data: CURRICULUM.mock, label: "Boss" });
+    nodes.push({ type: "done", id: "done", label: "Finish" });
+    return nodes;
+  }
+
+  /* =================================================================
+     MATRIX VISUALIZER
+  ================================================================= */
+  function matrixGrid(M, opts = {}) {
+    const n = M.length;
+    const cols = M[0].length;
+    const grid = el("div", "mx");
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    M.forEach((row, r) => {
+      row.forEach((val, c) => {
+        const cell = el("div", "mx-cell", String(val));
+        if (opts.highlight && opts.highlight.r === r && opts.highlight.c === c)
+          cell.classList.add("hl");
+        if (opts.dimRow === r) cell.classList.add("dim");
+        if (opts.dimCol === c) cell.classList.add("dim");
+        if (opts.diag && r === c) cell.classList.add("diag");
+        if (opts.greenDiag && r === c) cell.classList.add("green");
+        if (opts.redAnti && r + c === n - 1) cell.classList.add("red");
+        if (opts.changedRows && opts.changedRows.includes(r))
+          cell.classList.add("changed");
+        grid.appendChild(cell);
+      });
+    });
+    return grid;
+  }
+
+  function renderViz(container, viz) {
+    container.innerHTML = "";
+    if (!viz || viz.type === "none") {
+      container.appendChild(el("div", "viz-empty", "🧮"));
+      return;
+    }
+    const wrap = el("div", "viz-wrap fade");
+
+    if (viz.type === "two") {
+      const opts = {};
+      if (viz.phase === "diagonals") {
+        opts.greenDiag = true;
+        opts.redAnti = true;
+      }
+      wrap.appendChild(matrixGrid(viz.M, opts));
+      if (viz.phase === "diagonals") {
+        const legend = el(
+          "div",
+          "viz-legend",
+          `<span class="chip green">+ad (down →)</span><span class="chip red">− bc (up ↗)</span>`
+        );
+        wrap.appendChild(legend);
+      }
+      if (viz.phase === "result")
+        wrap.appendChild(el("div", "viz-result", `det = ${viz.result}`));
+    } else if (viz.type === "cofactor") {
+      const opts = {};
+      if (viz.phase === "term") {
+        opts.highlight = { r: viz.row, c: viz.col };
+        opts.dimRow = viz.row;
+        opts.dimCol = viz.col;
+      }
+      wrap.appendChild(matrixGrid(viz.M, opts));
+      if (viz.phase === "term") {
+        const arrow = el("div", "viz-arrow", "↓ delete its row &amp; column");
+        wrap.appendChild(arrow);
+        const minorWrap = el("div", "viz-minor-wrap");
+        const sign = el(
+          "span",
+          `sign-badge ${viz.sign === 1 ? "pos" : "neg"}`,
+          viz.sign === 1 ? "+" : "−"
+        );
+        minorWrap.appendChild(sign);
+        minorWrap.appendChild(matrixGrid(viz.minor, {}));
+        wrap.appendChild(minorWrap);
+      }
+      if (viz.phase === "result")
+        wrap.appendChild(el("div", "viz-result", `det(A) = ${viz.result}`));
+    } else if (viz.type === "diagonal") {
+      wrap.appendChild(matrixGrid(viz.M, { diag: true }));
+      if (viz.phase === "result")
+        wrap.appendChild(el("div", "viz-result", `det = ${viz.result}`));
+      else
+        wrap.appendChild(
+          el("div", "viz-legend", `<span class="chip diag-chip">multiply the diagonal</span>`)
+        );
+    } else if (viz.type === "signgrid") {
+      const n = viz.n || 3;
+      const grid = el("div", "mx sign-grid");
+      grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+      for (let r = 0; r < n; r++)
+        for (let c = 0; c < n; c++) {
+          const s = (r + c) % 2 === 0 ? "+" : "−";
+          const cell = el("div", `mx-cell sign ${s === "+" ? "pos" : "neg"}`, s);
+          grid.appendChild(cell);
+        }
+      wrap.appendChild(grid);
+      wrap.appendChild(
+        el("div", "viz-legend", `<span class="chip">corners + center are +, edges are −</span>`)
+      );
+    } else if (viz.type === "rowop") {
+      const row = el("div", "rowop");
+      row.appendChild(matrixGrid(viz.before, {}));
+      const mid = el("div", "rowop-mid");
+      mid.appendChild(el("div", "rowop-op", `\\(${viz.op}\\)`));
+      mid.appendChild(el("div", "rowop-arrow", "⟶"));
+      const eff =
+        viz.effect === "no change"
+          ? "effect-ok"
+          : viz.effect.includes("−1")
+          ? "effect-flip"
+          : "effect-scale";
+      mid.appendChild(el("div", `rowop-effect ${eff}`, `det ${viz.effect}`));
+      row.appendChild(mid);
+      row.appendChild(matrixGrid(viz.after, {}));
+      wrap.appendChild(row);
+    } else if (viz.type === "matrixOnly") {
+      wrap.appendChild(matrixGrid(viz.M, {}));
+      if (viz.note) wrap.appendChild(el("div", "viz-legend", `<span class="chip">${viz.note}</span>`));
+    }
+
+    container.appendChild(wrap);
+    typeset(container);
+  }
+
+  /* =================================================================
+     STEP PLAYER  (one step at a time, Next/Back)
+  ================================================================= */
+  function stepPlayer(mountText, mountViz, steps, opts = {}) {
+    let i = 0;
+    const total = steps.length;
+
+    const dots = el("div", "step-dots");
+    for (let k = 0; k < total; k++) dots.appendChild(el("span", "dot"));
+
+    const titleEl = el("div", "step-title");
+    const bodyEl = el("div", "step-body");
+    const nav = el("div", "step-nav");
+    const back = el("button", "btn ghost", "‹ Back");
+    const next = el("button", "btn primary", "Next step ›");
+    const counter = el("span", "step-counter");
+    nav.append(back, counter, next);
+
+    mountText.innerHTML = "";
+    mountText.append(dots, titleEl, bodyEl, nav);
+
+    function render() {
+      const s = steps[i];
+      titleEl.textContent = `Step ${i + 1}. ${s.title}`;
+      bodyEl.className = "step-body fade";
+      bodyEl.innerHTML = s.html;
+      // restart fade animation
+      void bodyEl.offsetWidth;
+      typeset(bodyEl);
+      renderViz(mountViz, s.viz);
+      counter.textContent = `${i + 1} / ${total}`;
+      back.disabled = i === 0;
+      [...dots.children].forEach((d, k) =>
+        d.classList.toggle("on", k <= i)
+      );
+      next.textContent = i === total - 1 ? "Done ✓" : "Next step ›";
+    }
+
+    back.onclick = () => {
+      if (i > 0) {
+        i--;
+        render();
+      }
+    };
+    next.onclick = () => {
+      if (i < total - 1) {
+        i++;
+        render();
+      } else if (opts.onDone) {
+        opts.onDone();
+      }
+    };
+    render();
+  }
+
+  /* =================================================================
+     NODE RENDERERS
+  ================================================================= */
+  const main = () => $("#main");
+
+  function sourceTag(src) {
+    const cls = src && src.includes("Lab 6") ? "tag-lab" : src && src.includes("Predicted") ? "tag-pred" : "tag-book";
+    return `<span class="src-tag ${cls}">${src}</span>`;
+  }
+
+  function go(idx) {
+    current = Math.max(0, Math.min(path.length - 1, idx));
+    renderSidebar();
+    renderNode(path[current]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function markComplete(id) {
+    state.completed[id] = true;
+    saveState();
+    renderSidebar();
+  }
+
+  function nextButton(label = "Continue ›") {
+    const b = el("button", "btn primary big", label);
+    b.onclick = () => go(current + 1);
+    return b;
+  }
+
+  function renderNode(node) {
+    const m = main();
+    m.innerHTML = "";
+    if (node.type === "intro") return renderIntro(m);
+    if (node.type === "concept") return renderConcept(m, node);
+    if (node.type === "guided") return renderGuided(m, node);
+    if (node.type === "practice") return renderPractice(m, node, node.stage.practice, `Stage ${node.stage.id} · Practice`);
+    if (node.type === "interleave") return renderInterleave(m, node);
+    if (node.type === "mock") return renderMock(m, node);
+    if (node.type === "exam") return renderExam(m, node);
+    if (node.type === "done") return renderDone(m);
+  }
+
+  /* ----- intro ----- */
+  function renderIntro(m) {
+    const meta = CURRICULUM.meta;
+    const pills = (meta.pills || [
+      `⏱ ≈ ${meta.estTotalMin || 60} min`,
+      `🧠 ${(CURRICULUM.stages || []).length} stages`,
+    ]).map((p) => `<div class="meta-pill">${p}</div>`).join("");
+    const how = meta.how || [
+      "<b>Learn</b> each idea one card at a time — the panel on the right shows exactly what changes.",
+      "<b>Guided</b>: fully worked problems, revealed one step per click. Feel ready? Skip straight to practice.",
+      "<b>Practice = a locked gauntlet.</b> No AI, no internet, no calculator app. Type your answer or hit “I don't know.” Miss it and I reteach, then hand you a fresh one until it's locked.",
+      "<b>Interleaving</b>: earlier skills pop back up so they actually stick.",
+      "Everything you get wrong lands in the <b>Wrong-Answer Tracker</b> (bottom-right).",
+    ];
+    const card = el("div", "card hero");
+    card.innerHTML = `
+      <div class="kicker">${meta.course || "MA123"}</div>
+      <h1>${meta.lab || meta.title || "Study Guide"}</h1>
+      <p class="lede">${meta.lede || `A guided, visual, by-hand workout — built from <b>${meta.book || ""}</b>.`}</p>
+      <div class="meta-row">${pills}</div>
+      <div class="how"><h3>How this works</h3><ul>${how.map((h) => `<li>${h}</li>`).join("")}</ul></div>
+      ${meta.body || ""}
+      ${meta.sourceNote ? `<div class="recommend">${meta.sourceNote}</div>` : ""}
+      ${(CURRICULUM.stages || []).length ? `<div class="recommend"><b>Recommended path:</b> just keep clicking <i>Continue</i>. Or jump anywhere from the map on the left.</div>` : ""}
+    `;
+    m.appendChild(card);
+    m.appendChild(nextButton(meta.startLabel || "Start ›"));
+    typeset(m);
+  }
+
+  /* ----- concept ----- */
+  function renderConcept(m, node) {
+    const st = node.stage;
+    const head = el("div", "node-head");
+    head.innerHTML = `<div class="kicker">Stage ${st.id} · Learn</div>
+      <h2>${st.concept.title}</h2>
+      <p class="tagline">${st.tagline}</p>`;
+    m.appendChild(head);
+
+    const stagewrap = el("div", "stage-grid");
+    const left = el("div", "panel text-panel");
+    const right = el("div", "panel viz-panel");
+    stagewrap.append(left, right);
+    m.appendChild(stagewrap);
+
+    const steps = st.concept.cards.map((c, i) => ({
+      title: i === 0 ? "Core idea" : `Build on it`,
+      html: c.html,
+      viz: c.viz || { type: "none" },
+    }));
+
+    stepPlayer(left, right, steps, {
+      onDone: () => {
+        markComplete(node.id);
+        const foot = el("div", "node-foot");
+        foot.appendChild(
+          el("div", "ok-note", "Concept covered. Now lock it in with the guided problems.")
+        );
+        foot.appendChild(nextButton("Go to guided problems ›"));
+        m.appendChild(foot);
+        typeset(foot);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      },
+    });
+  }
+
+  /* ----- guided ----- */
+  function renderGuided(m, node) {
+    const st = node.stage;
+    const head = el("div", "node-head");
+    head.innerHTML = `<div class="kicker">Stage ${st.id} · Guided</div>
+      <h2>Worked problems — one step at a time</h2>
+      <p class="tagline">${st.guided.intro}</p>`;
+    m.appendChild(head);
+
+    let gi = 0;
+    const probs = st.guided.problems;
+
+    const stagewrap = el("div", "stage-grid");
+    const left = el("div", "panel text-panel");
+    const right = el("div", "panel viz-panel");
+    stagewrap.append(left, right);
+    m.appendChild(stagewrap);
+
+    const controls = el("div", "guided-controls");
+    m.appendChild(controls);
+
+    function loadProblem(idx) {
+      gi = idx;
+      const p = probs[idx];
+      const built = p.build();
+      // prepend a framing step that shows the problem
+      const framing = {
+        title: p.title,
+        html: `${sourceTag(p.source)}<p class="prob-intro">${p.promptHtml}</p>`,
+        viz: p.matrix ? { type: "matrixOnly", M: p.matrix, note: "" } : { type: "none" },
+      };
+      const steps = [framing, ...built.steps];
+      stepPlayer(left, right, steps, {
+        onDone: () => buildControls(true),
+      });
+      buildControls(false);
+    }
+
+    function buildControls(done) {
+      controls.innerHTML = "";
+      const dotline = el("div", "guided-progress");
+      probs.forEach((p, k) => {
+        const d = el("button", "gdot" + (k === gi ? " on" : "") + (k < gi ? " seen" : ""), String(k + 1));
+        d.onclick = () => loadProblem(k);
+        dotline.appendChild(d);
+      });
+      controls.appendChild(dotline);
+
+      const row = el("div", "guided-btnrow");
+      if (gi < probs.length - 1) {
+        const nextProb = el("button", "btn primary", `Next worked problem (${gi + 2}/${probs.length}) ›`);
+        nextProb.onclick = () => loadProblem(gi + 1);
+        row.appendChild(nextProb);
+      }
+      // optional skip after 2 guided problems
+      if (gi >= 1) {
+        const skip = el("button", "btn accent", "I'm ready — skip to Practice ⏭");
+        skip.onclick = () => {
+          markComplete(node.id);
+          go(current + 1);
+        };
+        row.appendChild(skip);
+      }
+      if (gi === probs.length - 1) {
+        const toPractice = el("button", "btn primary big", "Start the Practice gauntlet ›");
+        toPractice.onclick = () => {
+          markComplete(node.id);
+          go(current + 1);
+        };
+        row.appendChild(toPractice);
+      }
+      controls.appendChild(row);
+    }
+
+    loadProblem(0);
+  }
+
+  /* ----- practice (gauntlet) ----- */
+  function renderPractice(m, node, practice, headline) {
+    const head = el("div", "node-head");
+    head.innerHTML = `<div class="kicker">${headline}</div>
+      <h2>Practice gauntlet</h2>
+      <p class="tagline">${practice.intro}</p>`;
+    m.appendChild(head);
+
+    const card = el("div", "card gate");
+    card.innerHTML = `
+      <div class="gate-icon">🔒</div>
+      <h3>${practice.slots.length}-question gauntlet</h3>
+      <p>Once you start, the page locks to one question at a time. Answer it (or press
+        <b>I don't know</b>) to move on. Wrong answers get retaught and replaced with a
+        fresh variant until you clear them.</p>
+      <p class="warn">✋ No AI. No internet. No calculator app. Paper and brain only.</p>
+    `;
+    const startBtn = el("button", "btn primary big", "Begin gauntlet ▶");
+    startBtn.onclick = () =>
+      runGauntlet(practice.slots, headline, () => {
+        markComplete(node.id);
+        card.innerHTML = `<div class="gate-icon">✅</div><h3>Gauntlet cleared!</h3>
+          <p>Every question answered correctly. Keep the momentum.</p>`;
+        card.appendChild(nextButton());
+        typeset(card);
+      });
+    card.appendChild(startBtn);
+    m.appendChild(card);
+    typeset(m);
+  }
+
+  /* ----- interleave ----- */
+  function renderInterleave(m, node) {
+    const d = node.data;
+    const head = el("div", "node-head");
+    head.innerHTML = `<div class="kicker">Spaced Review</div>
+      <h2>${d.title}</h2>
+      <p class="tagline">${d.blurb}</p>`;
+    m.appendChild(head);
+    const card = el("div", "card gate review");
+    card.innerHTML = `<div class="gate-icon">🔁</div><h3>${d.slots.length} quick recall questions</h3>
+      <p>Same locked rules. This is interleaving — proving old skills still fire when mixed in.</p>`;
+    const b = el("button", "btn primary big", "Begin review ▶");
+    b.onclick = () =>
+      runGauntlet(d.slots, d.title, () => {
+        markComplete(node.id);
+        card.innerHTML = `<div class="gate-icon">✅</div><h3>Review cleared!</h3>`;
+        card.appendChild(nextButton());
+        typeset(card);
+      });
+    card.appendChild(b);
+    m.appendChild(card);
+    typeset(m);
+  }
+
+  /* ----- mock ----- */
+  function renderMock(m, node) {
+    const d = node.data;
+    const head = el("div", "node-head");
+    head.innerHTML = `<div class="kicker">Final</div><h2>${d.title}</h2>
+      <p class="tagline">${d.blurb}</p>`;
+    m.appendChild(head);
+    const card = el("div", "card gate boss");
+    card.innerHTML = `<div class="gate-icon">🏆</div><h3>${d.slots.length}-question boss gauntlet</h3>
+      <p class="warn">✋ No AI. No internet. No calculator app. This is the dress rehearsal.</p>`;
+    const b = el("button", "btn primary big", "Enter the boss gauntlet ▶");
+    b.onclick = () =>
+      runGauntlet(d.slots, d.title, () => {
+        markComplete(node.id);
+        card.innerHTML = `<div class="gate-icon">🎉</div><h3>Boss cleared — you're ready for the lab.</h3>`;
+        card.appendChild(nextButton("See summary ›"));
+        typeset(card);
+      });
+    card.appendChild(b);
+    m.appendChild(card);
+    typeset(m);
+  }
+
+  /* ----- exam (timed, graded mock final) ----- */
+  function renderExam(m, node) {
+    const d = node.data;
+    const head = el("div", "node-head");
+    head.innerHTML = `<div class="kicker">Mock Final Exam</div><h2>${d.title}</h2>
+      <p class="tagline">${d.blurb || ""}</p>`;
+    m.appendChild(head);
+    const card = el("div", "card gate boss");
+    card.innerHTML = `<div class="gate-icon">📝</div><h3>${d.slots.length} questions${d.timed ? " · timed" : ""}</h3>
+      <p>${d.notesAllowed
+        ? "📖 <b>Notes allowed</b> for this one — but commit to real answers."
+        : "🚫 <b>Closed book.</b> No notes, no AI, no internet. Exam conditions."}</p>
+      ${d.timeLimitMin ? `<p class="warn">⏱ Target time: ${d.timeLimitMin} minutes.</p>` : ""}
+      <p>Answer every question, then get a full score report. Anything you miss is explained in
+        full and given a <b>follow-up question</b> to lock it in.</p>`;
+    const b = el("button", "btn primary big", "Start the exam ▶");
+    b.onclick = () => runExam(d, () => {
+      markComplete(node.id);
+      card.innerHTML = `<div class="gate-icon">🎉</div><h3>Exam complete.</h3>
+        <p>Your score report was shown. Weak spots are logged in the tracker.</p>`;
+      card.appendChild(nextButton());
+      typeset(card);
+    });
+    card.appendChild(b);
+    m.appendChild(card);
+    typeset(m);
+  }
+
+  function runExam(cfg, onDone) {
+    const overlay = el("div", "overlay");
+    document.body.appendChild(overlay);
+    document.body.classList.add("locked");
+    const results = []; // {prob, correct, picked}
+    let idx = 0;
+    const total = cfg.slots.length;
+
+    // timer
+    let seconds = 0;
+    const timerEl = el("div", "exam-timer");
+    let timerId = null;
+    if (cfg.timed) {
+      timerId = setInterval(() => {
+        seconds++;
+        const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const ss = String(seconds % 60).padStart(2, "0");
+        const over = cfg.timeLimitMin && seconds > cfg.timeLimitMin * 60;
+        timerEl.textContent = `⏱ ${mm}:${ss}${over ? " (over target)" : ""}`;
+        timerEl.classList.toggle("over", !!over);
+      }, 1000);
+    }
+
+    function showQuestion() {
+      if (idx >= total) return gradeExam();
+      const slot = cfg.slots[idx];
+      const prob = slot.generate();
+      overlay.innerHTML = "";
+      const modal = el("div", "modal fade");
+      const top = el("div", "modal-top");
+      top.innerHTML = `<div class="modal-context">${cfg.title}</div>
+        <div class="modal-progress">Question ${idx + 1} / ${total}</div>`;
+      modal.appendChild(top);
+      if (cfg.timed) modal.appendChild(timerEl);
+      const note = el("div", "lock-note", cfg.notesAllowed
+        ? "📖 Notes allowed. Commit to an answer — you'll be graded at the end."
+        : "🚫 Closed book — no notes, no AI, no internet.");
+      modal.appendChild(note);
+      const qcard = el("div", "qcard");
+      qcard.innerHTML = `${slot.source ? sourceTag(slot.source) : prob.source ? sourceTag(prob.source) : ""}
+        <div class="qprompt">${prob.promptHtml || "Solve:"}</div>`;
+      if (prob.matrix) { const w = el("div", "qmatrix"); w.innerHTML = `\\[${Engine.latexMatrix(prob.matrix, "v")}\\]`; qcard.appendChild(w); }
+      modal.appendChild(qcard);
+      const zone = el("div", "answer-zone");
+      modal.appendChild(zone);
+      overlay.appendChild(modal);
+      typeset(modal);
+      if (/[?&]test=1/.test(location.search)) window.__currentProb = prob;
+
+      const record = (correct, picked) => {
+        results.push({ prob, correct, picked, slot });
+        if (!correct) logWrong(prob, cfg.title);
+        idx++;
+        showQuestion();
+      };
+
+      buildAnswerInputs(zone, prob, record, /*examMode*/ true);
+    }
+
+    function gradeExam() {
+      if (timerId) clearInterval(timerId);
+      const score = results.filter((r) => r.correct).length;
+      overlay.innerHTML = "";
+      const modal = el("div", "modal fade");
+      const pct = Math.round((score / total) * 100);
+      modal.innerHTML = `<div class="modal-top"><div class="modal-context">${cfg.title}</div>
+        <div class="modal-progress">Score report</div></div>
+        <div class="exam-score">${score} / ${total} &nbsp;·&nbsp; ${pct}%${cfg.timed ? ` &nbsp;·&nbsp; ⏱ ${Math.floor(seconds/60)}m ${seconds%60}s` : ""}</div>`;
+      const wrong = results.filter((r) => !r.correct);
+      if (!wrong.length) {
+        modal.innerHTML += `<p class="exam-allright">🏆 Perfect. Every question correct.</p>`;
+        const done = el("button", "btn primary big", "Finish ✓");
+        done.onclick = () => { overlay.remove(); document.body.classList.remove("locked"); onDone(); };
+        modal.appendChild(done);
+        overlay.appendChild(modal);
+        typeset(modal);
+        return;
+      }
+      modal.innerHTML += `<p class="exam-review-intro">Let's walk through what you missed. Each gets a full explanation and one follow-up question.</p>`;
+      const startReview = el("button", "btn primary big", `Review ${wrong.length} missed question${wrong.length > 1 ? "s" : ""} ›`);
+      startReview.onclick = () => reviewWrong(wrong, 0);
+      modal.appendChild(startReview);
+      overlay.appendChild(modal);
+      typeset(modal);
+
+      function reviewWrong(list, i) {
+        if (i >= list.length) { overlay.remove(); document.body.classList.remove("locked"); onDone(); return; }
+        const { prob } = list[i];
+        overlay.innerHTML = "";
+        const md = el("div", "modal fade");
+        md.innerHTML = `<div class="modal-top"><div class="modal-context">Review ${i + 1}/${list.length}</div>
+          <div class="modal-progress">Full walkthrough</div></div>
+          <div class="qcard"><div class="qprompt">${prob.promptHtml || "Solve:"}</div>
+          ${prob.matrix ? `<div class="qmatrix">\\[${Engine.latexMatrix(prob.matrix, "v")}\\]</div>` : ""}</div>`;
+        const reteach = el("div", "reteach");
+        renderReteach(reteach, prob);
+        md.appendChild(reteach);
+        // follow-up question from the SAME slot generator
+        const followWrap = el("div", "followup");
+        followWrap.innerHTML = `<div class="followup-head">🎯 Follow-up — try one more like it (no notes):</div>`;
+        md.appendChild(followWrap);
+        overlay.appendChild(md);
+        typeset(md);
+        const followProb = list[i].slot.generate();
+        const fzone = el("div", "answer-zone");
+        followWrap.appendChild(fzone);
+        typeset(fzone);
+        buildAnswerInputs(fzone, followProb, (correct) => {
+          const fb = el("div", `feedback ${correct ? "ok-fb" : "bad-fb"} show`);
+          fb.innerHTML = correct ? "✅ Got it." : "❌ Still off — the full method is above; keep this one in your tracker.";
+          if (!correct) logWrong(followProb, cfg.title + " (follow-up)");
+          followWrap.appendChild(fb);
+          const nb = el("button", "btn primary big", i + 1 >= list.length ? "Finish review ✓" : "Next review ›");
+          nb.onclick = () => reviewWrong(list, i + 1);
+          fb.appendChild(el("div", "spacer"));
+          fb.appendChild(nb);
+          typeset(fb);
+        }, true);
+      }
+    }
+
+    showQuestion();
+  }
+
+  // shared input builder used by exam (and could be reused)
+  function buildAnswerInputs(zone, prob, done, examMode) {
+    prob.__examMode = examMode;
+    if (prob.type === "tf") {
+      const row = el("div", "tf-row");
+      const t = el("button", "btn choice", "TRUE");
+      const f = el("button", "btn choice", "FALSE");
+      t.onclick = () => finish(true === prob.answer, true);
+      f.onclick = () => finish(false === prob.answer, false);
+      row.append(t, f);
+      zone.appendChild(row);
+    } else if (prob.type === "mc") {
+      const list = el("div", "mc-list");
+      prob.choices.forEach((ch, k) => {
+        const b = el("button", "btn choice mc", ch.html);
+        b.onclick = () => finish(k === prob.answer, k);
+        list.appendChild(b);
+      });
+      zone.appendChild(list);
+      typeset(zone);
+    } else {
+      const row = el("div", "num-row");
+      const input = el("input", "num-input");
+      input.type = "text";
+      input.placeholder = "your answer (e.g. -6 or 1/2)";
+      const submit = el("button", "btn primary", "Submit");
+      const go = () => {
+        const v = parseNumeric(input.value);
+        if (Number.isNaN(v)) { input.classList.add("err"); return; }
+        finish(approx(v, prob.answer), input.value);
+      };
+      submit.onclick = go;
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+      row.append(input, submit);
+      zone.appendChild(row);
+      setTimeout(() => input.focus(), 40);
+    }
+    const idk = el("button", "btn idk", "I don't know");
+    idk.onclick = () => finish(false, "IDK");
+    zone.appendChild(idk);
+
+    function finish(correct, picked) {
+      zone.querySelectorAll("button, input").forEach((n) => (n.disabled = true));
+      if (examMode) {
+        const fb = el("div", `feedback ${correct ? "ok-fb" : "bad-fb"} show`);
+        fb.textContent = correct ? "✓ recorded" : "✗ recorded";
+        zone.appendChild(fb);
+        setTimeout(() => done(correct, picked), 350);
+      } else {
+        done(correct, picked);
+      }
+    }
+  }
+
+  /* ----- done ----- */
+  function renderDone(m) {
+    const meta = CURRICULUM.meta;
+    const wrongCount = state.wrongLog.length;
+    const card = el("div", "card hero");
+    card.innerHTML = `<div class="kicker">${meta.lab || meta.title || "MA123"}</div>
+      <h1>${meta.doneTitle || "You made it 🎓"}</h1>
+      <p class="lede">${meta.doneText || "You've worked through everything in this guide — all by hand."}</p>
+      <div class="meta-row">
+        <div class="meta-pill">Sections cleared: ${(CURRICULUM.stages || []).length}</div>
+        <div class="meta-pill">Logged misses: ${wrongCount}</div>
+      </div>
+      <p>Best next move: open the <b>Wrong-Answer Tracker</b> and re-run any concept that shows
+        up there. Recall beats re-reading.</p>`;
+    m.appendChild(card);
+    const row = el("div", "guided-btnrow");
+    const restart = el("button", "btn ghost", "↺ Restart from the top");
+    restart.onclick = () => go(0);
+    const replayWrong = el("button", "btn accent", "Re-drill my missed concepts ▶");
+    replayWrong.onclick = () => drillWrong();
+    row.append(replayWrong, restart);
+    m.appendChild(row);
+    typeset(m);
+  }
+
+  /* =================================================================
+     THE GAUNTLET  (locked modal, one question at a time)
+  ================================================================= */
+  function runGauntlet(slots, contextLabel, onAllDone) {
+    const overlay = el("div", "overlay");
+    document.body.appendChild(overlay);
+    document.body.classList.add("locked");
+
+    let slotIndex = 0;
+    let cleared = 0;
+    const totalSlots = slots.length;
+
+    function nextSlot() {
+      if (slotIndex >= totalSlots) {
+        // finished
+        overlay.remove();
+        document.body.classList.remove("locked");
+        onAllDone();
+        return;
+      }
+      showProblem(slots[slotIndex]);
+    }
+
+    function showProblem(slot) {
+      const prob = slot.generate();
+      overlay.innerHTML = "";
+      const modal = el("div", "modal fade");
+
+      const top = el("div", "modal-top");
+      top.innerHTML = `<div class="modal-context">${contextLabel}</div>
+        <div class="modal-progress">Question ${slotIndex + 1} / ${totalSlots} · cleared ${cleared}</div>`;
+      modal.appendChild(top);
+
+      const lockNote = el("div", "lock-note", "🔒 Locked — no AI, no internet. Answer to continue.");
+      modal.appendChild(lockNote);
+
+      const qcard = el("div", "qcard");
+      qcard.innerHTML = `${slot.source ? sourceTag(slot.source) : prob.source ? sourceTag(prob.source) : ""}
+        <div class="qprompt">${prob.promptHtml || "Compute the determinant:"}</div>`;
+      if (prob.matrix) {
+        const mwrap = el("div", "qmatrix");
+        mwrap.innerHTML = `\\[${Engine.latexMatrix(prob.matrix, "v")}\\]`;
+        qcard.appendChild(mwrap);
+      }
+      modal.appendChild(qcard);
+
+      const answerZone = el("div", "answer-zone");
+      modal.appendChild(answerZone);
+
+      const feedback = el("div", "feedback");
+      modal.appendChild(feedback);
+
+      overlay.appendChild(modal);
+      typeset(modal);
+
+      // test-only probe (active only with ?test=1 in the URL) so automated
+      // tests can verify the correct-answer path. Never set during normal use.
+      if (/[?&]test=1/.test(location.search)) window.__currentProb = prob;
+
+      // build inputs per type
+      if (prob.type === "tf") {
+        const row = el("div", "tf-row");
+        const tBtn = el("button", "btn choice", "TRUE");
+        const fBtn = el("button", "btn choice", "FALSE");
+        tBtn.onclick = () => judge(true === prob.answer, prob, feedback, answerZone, slot, true);
+        fBtn.onclick = () => judge(false === prob.answer, prob, feedback, answerZone, slot, false);
+        row.append(tBtn, fBtn);
+        answerZone.appendChild(row);
+        answerZone.appendChild(idkButton(prob, feedback, answerZone, slot));
+      } else if (prob.type === "mc") {
+        const list = el("div", "mc-list");
+        prob.choices.forEach((ch, k) => {
+          const b = el("button", "btn choice mc", ch.html);
+          b.onclick = () => judge(k === prob.answer, prob, feedback, answerZone, slot, k);
+          list.appendChild(b);
+        });
+        answerZone.appendChild(list);
+        answerZone.appendChild(idkButton(prob, feedback, answerZone, slot));
+        typeset(answerZone);
+      } else {
+        // numeric
+        const row = el("div", "num-row");
+        const input = el("input", "num-input");
+        input.type = "text";
+        input.setAttribute("inputmode", "text");
+        input.placeholder = "your answer (e.g. -6 or 1/2)";
+        const submit = el("button", "btn primary", "Submit");
+        const tryJudge = () => {
+          const v = parseNumeric(input.value);
+          if (Number.isNaN(v)) {
+            feedback.className = "feedback warn-fb show";
+            feedback.textContent = "Type a number (integer, decimal, or a/b fraction).";
+            return;
+          }
+          judge(approx(v, prob.answer), prob, feedback, answerZone, slot, input.value);
+        };
+        submit.onclick = tryJudge;
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") tryJudge();
+        });
+        row.append(input, submit);
+        answerZone.appendChild(row);
+        answerZone.appendChild(idkButton(prob, feedback, answerZone, slot));
+        setTimeout(() => input.focus(), 50);
+      }
+    }
+
+    function idkButton(prob, feedback, answerZone, slot) {
+      const b = el("button", "btn idk", "I don't know");
+      b.onclick = () => judge(false, prob, feedback, answerZone, slot, "IDK", true);
+      return b;
+    }
+
+    function judge(correct, prob, feedback, answerZone, slot, picked, isIDK) {
+      // disable inputs
+      answerZone.querySelectorAll("button, input").forEach((n) => (n.disabled = true));
+      if (correct) {
+        feedback.className = "feedback ok-fb show";
+        feedback.innerHTML = `✅ Correct.`;
+        // if MC/correct, optionally show why
+        const cont = el("button", "btn primary big", slotIndex + 1 >= totalSlots ? "Finish ✓" : "Next question ›");
+        cont.onclick = () => {
+          cleared++;
+          slotIndex++;
+          nextSlot();
+        };
+        feedback.appendChild(el("div", "spacer"));
+        feedback.appendChild(cont);
+      } else {
+        // log the miss
+        logWrong(prob, contextLabel);
+        feedback.className = "feedback bad-fb show";
+        feedback.innerHTML = isIDK
+          ? `🟡 No problem — let's learn it. Here's the full reasoning:`
+          : `❌ Not quite. Here's exactly how it works:`;
+        const reteach = el("div", "reteach");
+        renderReteach(reteach, prob);
+        feedback.appendChild(reteach);
+
+        const again = el("button", "btn primary big", "Got it — give me a fresh one ↻");
+        again.onclick = () => showProblem(slot); // brand new variant, same slot
+        feedback.appendChild(el("div", "spacer"));
+        feedback.appendChild(again);
+        typeset(feedback);
+      }
+    }
+
+    nextSlot();
+  }
+
+  function renderReteach(container, prob) {
+    if (prob.solution && prob.solution.steps) {
+      // mini step player inside the reteach
+      const wrap = el("div", "reteach-grid");
+      const txt = el("div", "reteach-text");
+      const viz = el("div", "reteach-viz");
+      wrap.append(txt, viz);
+      container.appendChild(wrap);
+      stepPlayer(txt, viz, prob.solution.steps, {});
+    } else if (prob.reteachHtml) {
+      container.innerHTML = `<div class="reteach-plain">${prob.reteachHtml}</div>`;
+      typeset(container);
+    } else if (prob.type === "mc" && prob.choices) {
+      const correct = prob.choices[prob.answer];
+      container.innerHTML = `<div class="reteach-plain">Correct choice: <b>${correct.html}</b>${
+        correct.why ? `<br>${correct.why}` : ""
+      }</div>`;
+      typeset(container);
+    } else {
+      container.innerHTML = `<div class="reteach-plain">The correct answer is <b>${prob.answer}</b>.</div>`;
+    }
+  }
+
+  /* ---------- wrong-answer tracker ---------- */
+  function logWrong(prob, context) {
+    const label =
+      prob.type === "tf"
+        ? "True/False trap"
+        : prob.type === "mc"
+        ? "Concept choice"
+        : prob.matrix
+        ? "Determinant computation"
+        : "Determinant property";
+    state.wrongLog.unshift({
+      label,
+      source: prob.source || "—",
+      context,
+      when: Date.now(),
+    });
+    if (state.wrongLog.length > 60) state.wrongLog.pop();
+    saveState();
+    renderTracker();
+  }
+
+  function renderTracker() {
+    const panel = $("#tracker-body");
+    if (!panel) return;
+    const log = state.wrongLog;
+    $("#tracker-count").textContent = log.length;
+    if (!log.length) {
+      panel.innerHTML = `<div class="tracker-empty">No misses yet. 🎯<br><span>Anything you miss in a gauntlet lands here so you can re-drill it.</span></div>`;
+      return;
+    }
+    // group by label+context
+    const groups = {};
+    log.forEach((w) => {
+      const key = `${w.label} · ${w.context}`;
+      groups[key] = (groups[key] || 0) + 1;
+    });
+    panel.innerHTML = Object.entries(groups)
+      .sort((a, b) => b[1] - a[1])
+      .map(
+        ([k, n]) =>
+          `<div class="tracker-row"><span class="tracker-label">${k}</span><span class="tracker-n">×${n}</span></div>`
+      )
+      .join("");
+  }
+
+  function drillWrong() {
+    // gather every practice/mock/exam slot generator in this HTML and sample from them
+    const gens = [];
+    (CURRICULUM.stages || []).forEach((st) =>
+      (st.practice && st.practice.slots || []).forEach((s) => gens.push(s)));
+    Object.values(CURRICULUM.interleave || {}).forEach((iv) =>
+      (iv.slots || []).forEach((s) => gens.push(s)));
+    if (CURRICULUM.mock) (CURRICULUM.mock.slots || []).forEach((s) => gens.push(s));
+    if (CURRICULUM.exam) (CURRICULUM.exam.slots || []).forEach((s) => gens.push(s));
+    const pick = gens.length ? gens : [{ label: "recall", generate: () => {
+      const g = Engine.gen3x3();
+      return { type: "numeric", source: "Re-drill", promptHtml: "Compute the determinant:", matrix: g.M, answer: g.answer, solution: { steps: Engine.steps3x3(g.M).steps } };
+    } }];
+    const chosen = pick.sort(() => Math.random() - 0.5).slice(0, Math.min(5, pick.length));
+    runGauntlet(chosen, "Re-drill · your misses", () => go(path.length - 1));
+  }
+
+  /* ---------- numeric parsing ---------- */
+  function parseNumeric(str) {
+    if (str == null) return NaN;
+    const s = String(str).trim().replace(/\s+/g, "");
+    if (s === "") return NaN;
+    if (/^[-+]?\d+\/[-+]?\d+$/.test(s)) {
+      const [a, b] = s.split("/").map(Number);
+      if (b === 0) return NaN;
+      return a / b;
+    }
+    const v = Number(s);
+    return Number.isFinite(v) ? v : NaN;
+  }
+  const approx = (a, b) => Math.abs(a - b) < 1e-6;
+
+  /* =================================================================
+     SIDEBAR (stage map + free navigation)
+  ================================================================= */
+  function renderSidebar() {
+    const sb = $("#stage-map");
+    sb.innerHTML = "";
+    path.forEach((node, idx) => {
+      if (node.type === "done") return;
+      const item = el("button", "map-item");
+      if (idx === current) item.classList.add("active");
+      if (state.completed[node.id]) item.classList.add("complete");
+
+      let icon = "•";
+      let title = node.label;
+      let sub = "";
+      if (node.type === "intro") {
+        icon = "🚀";
+        title = "Welcome";
+      } else if (node.type === "concept") {
+        icon = node.stage.id;
+        title = node.stage.name;
+        sub = "Learn";
+        item.classList.add("stage-start");
+      } else if (node.type === "guided") {
+        icon = "✎";
+        sub = "Guided";
+        title = `${node.stage.name}`;
+      } else if (node.type === "practice") {
+        icon = "🎯";
+        sub = "Practice";
+        title = `${node.stage.name}`;
+      } else if (node.type === "interleave") {
+        icon = "🔁";
+        title = "Spaced review";
+      } else if (node.type === "mock") {
+        icon = "🏆";
+        title = "Boss gauntlet";
+      }
+      item.innerHTML = `<span class="map-icon">${icon}</span>
+        <span class="map-text"><span class="map-title">${title}</span>${
+          sub ? `<span class="map-sub">${sub}</span>` : ""
+        }</span>${state.completed[node.id] ? '<span class="map-check">✓</span>' : ""}`;
+      item.onclick = () => go(idx);
+      sb.appendChild(item);
+    });
+  }
+
+  /* =================================================================
+     INIT
+  ================================================================= */
+  function init() {
+    renderSidebar();
+    renderTracker();
+    renderNode(path[current]);
+
+    // tracker toggle
+    $("#tracker-toggle").onclick = () =>
+      $("#tracker").classList.toggle("open");
+    $("#tracker-clear").onclick = () => {
+      state.wrongLog = [];
+      saveState();
+      renderTracker();
+    };
+    // reset progress
+    $("#reset-progress").onclick = () => {
+      if (confirm("Reset all progress and the wrong-answer tracker?")) {
+        state.completed = {};
+        state.wrongLog = [];
+        saveState();
+        go(0);
+        renderTracker();
+      }
+    };
+  }
+
+  // expose a couple helpers used by curriculum-generated reteach (none needed globally now)
+  window.__MA123 = { go };
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+
+//]]>
+</script>
+</body></html>
